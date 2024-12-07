@@ -1,0 +1,22 @@
+{
+  "domain": "trafikmeldinger",
+  "name": "Trafikmeldinger",
+  "codeowners": [
+    "@kgn3400"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/kgn3400/trafikmeldinger",
+  "homekit": {},
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/kgn3400/trafikmeldinger/issues",
+  "requirements": [
+    "aiofiles",
+    "orjson",
+    "babel"
+  ],
+  "single_config_entry": true,
+  "ssdp": [],
+  "version": "1.0.0",
+  "zeroconf": []
+}

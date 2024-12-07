@@ -1,0 +1,86 @@
+{
+    "title": "Trafikmeldinger",
+    "entity_component": {
+        "_": {
+            "name": "Trafikmeldinger"
+        }
+    },
+    "device": {
+        "trafikmeldinger": {
+            "name": "Trafikmeldinger"
+        }
+    },
+    "config": {
+        "abort": {
+            "already_configured": "Enheden er allerede konfigureret"
+        },
+        "error": {
+            "unknown": "Uventet fejl"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "region": "Region",
+                    "transport_type": "Transporttype",
+                    "max_time_back": "Hent max timer tilabge",
+                    "max_row_fetch": "Hent max meldinger",
+                    "scroll_messages_every_minutes": "Scroll besked hver",
+                    "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløserr",
+                    "restart_timer": "Genstart Timer hjælper automatisk"
+                }
+            }
+        }
+    },
+    "options": {
+        "abort": {
+            "already_configured": "Enheden er allerede konfigureret"
+        },
+        "error": {
+            "unknown": "Uventet fejl"
+        },
+        "step": {
+            "init": {
+                "data": {
+                    "region": "Region",
+                    "transport_type": "Transport type",
+                    "max_time_back": "Hent max timer tilabge",
+                    "max_row_fetch": "Hent max meldinger",
+                    "scroll_messages_every_minutes": "Scroll besked hver",
+                    "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløser",
+                    "restart_timer": "Genstart Timer hjælper automatisk"
+                }
+            },
+            "extra": {
+                "data": {
+                    "rt_received": "Modtaget",
+                    "rt_for": "",
+                    "rt_ago": "siden",
+                    "rt_now": "nu"
+                }
+            }
+        }
+    },
+    "issues": {
+        "missing_timer_entity": {
+            "description": "Det ser ud til, at timerhjælperen `{timer_entity}` enten er blevet slettet eller fjernet til brug i meddelelses loggen `{entity}`. \n\n Vær venlig at løse dette problem.",
+            "title": "Meddelelses log: Timer hjælper slettet eller omdøbt"
+        }
+    },
+    "selector": {
+        "region": {
+            "options": {
+                "ALL": "Hele landet",
+                "CPH": "København og Sjælland",
+                "MID-NORTH": "Midt-, Nord- og Østjylland",
+                "SOUTH": "Fyn, Trekanten og Sydjylland"
+            }
+        },
+        "transport_type": {
+            "options": {
+                "ALL": "Alle transport typer",
+                "PUBLIC": "kollektiv transport",
+                "PRIVATE": "Biltrafik"
+            }
+        }
+    }
+}

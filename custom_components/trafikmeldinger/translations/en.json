@@ -1,0 +1,86 @@
+{
+  "title": "Trafikmeldinger",
+  "entity_component": {
+    "_": {
+      "name": "Trafikmeldinger"
+    }
+  },
+  "device": {
+    "trafikmeldinger": {
+      "name": "Trafikmeldinger"
+    }
+  },
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured"
+    },
+    "error": {
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "region": "Region",
+          "transport_type": "Transport type",
+          "max_time_back": "Maximum hours back",
+          "max_row_fetch": "Maximum reports to fetch",
+          "scroll_messages_every_minutes": "Scroll messages every",
+          "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
+          "restart_timer": "Restart Timer helper automatic"
+        }
+      }
+    }
+  },
+  "options": {
+    "abort": {
+      "already_configured": "Device is already configured"
+    },
+    "error": {
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "init": {
+        "data": {
+          "region": "Region",
+          "transport_type": "Transport type",
+          "max_time_back": "Maximum hours back",
+          "max_row_fetch": "Maximum reports to fetch",
+          "scroll_messages_every_minutes": "Scroll messages every",
+          "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
+          "restart_timer": "Restart Timer helper automatic"
+        }
+      },
+      "extra": {
+        "data": {
+          "rt_received": "Received",
+          "rt_for": "",
+          "rt_ago": "ago",
+          "rt_now": "now"
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_timer_entity": {
+      "description": "It looks like either the Timer helper `{timer_entity}` has been deleted or removed for use in Trafikmeldinger `{entity}`. \n\n Please fix this problem.",
+      "title": "Trafikmeldinger: Timer helper deleted or renamed"
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "ALL": "The entire country",
+        "CPH": "København og Sjælland",
+        "MID-NORTH": "Midt-, Nord- og Østjylland",
+        "SOUTH": "Fyn, Trekanten og Sydjylland"
+      }
+    },
+    "transport_type": {
+      "options": {
+        "ALL": "All transport types",
+        "PUBLIC": "Public transport",
+        "PRIVATE": "Car"
+      }
+    }
+  }
+}
