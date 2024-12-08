@@ -213,13 +213,12 @@ class ComponentApi:
                     if done:
                         break
 
-                    # tmp_report["createdTime"] = dt_util.as_local(
-                    #     datetime.fromisoformat(tmp_report["createdTime"])
-                    # ).isoformat()
-
-                    # tmp_report["updatedTime"] = dt_util.as_local(
-                    #     datetime.fromisoformat(tmp_report["updatedTime"])
-                    # ).isoformat()
+                    tmp_report["region"] = (
+                        str(tmp_report["region"]).lower().replace("-", "_")
+                    )
+                    tmp_report["type"] = (
+                        str(tmp_report["type"]).lower().replace("-", "_")
+                    )
 
                     if (
                         tmp_report["region"] in region

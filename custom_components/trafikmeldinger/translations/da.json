@@ -69,17 +69,17 @@
     "selector": {
         "region": {
             "options": {
-                "ALL": "Hele landet",
-                "CPH": "København og Sjælland",
-                "MID-NORTH": "Midt-, Nord- og Østjylland",
-                "SOUTH": "Fyn, Trekanten og Sydjylland"
+                "all": "Hele landet",
+                "cph": "København og Sjælland",
+                "mid_north": "Midt-, Nord- og Østjylland",
+                "south": "Fyn, Trekanten og Sydjylland"
             }
         },
         "transport_type": {
             "options": {
-                "ALL": "Alle transport typer",
-                "PUBLIC": "kollektiv transport",
-                "PRIVATE": "Biltrafik"
+                "all": "Alle transport typer",
+                "public": "kollektiv transport",
+                "private": "Biltrafik"
             }
         }
     }
