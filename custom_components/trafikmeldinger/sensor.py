@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import CommonConfigEntry
 from .component_api import ComponentApi
-from .const import TRANSLATION_KEY
+from .const import DICT_REGION, DICT_TRANSPORT_TYPE, TRANSLATION_KEY
 from .entity import ComponentEntity
 
 
@@ -24,14 +24,14 @@ async def async_setup_entry(
 
     sensors = []
 
-    sensors.append(TraficReportSensor(entry))
+    sensors.append(TrafficLatestReportSensor(entry))
 
     async_add_entities(sensors)
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
-class TraficReportSensor(ComponentEntity, SensorEntity):
+class TrafficLatestReportSensor(ComponentEntity, SensorEntity):
     """Sensor class Trafikmeldinger."""
 
     # ------------------------------------------------------
@@ -47,8 +47,8 @@ class TraficReportSensor(ComponentEntity, SensorEntity):
         self.coordinator.update_interval = timedelta(minutes=1)
         self.coordinator.update_method = self.async_refresh
 
-        self._name = "Message"
-        self._unique_id = "message"
+        self._name = "Seneste"
+        self._unique_id = "seneste"
 
         self.translation_key = TRANSLATION_KEY
 
@@ -78,9 +78,9 @@ class TraficReportSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.trafiq_report) == 0:
+        if len(self.component_api.traffic_reports) == 0:
             return None
-        return self.component_api.trafiq_report[0]["formated_text"]
+        return self.component_api.traffic_reports[0]["formated_text"]
 
     # ------------------------------------------------------
     @property
@@ -94,9 +94,16 @@ class TraficReportSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.trafiq_report) == 0:
+        if len(self.component_api.traffic_reports) == 0:
             return attr
-        attr["report_md"] = self.component_api.trafiq_report[0]["formated_md"]
+        attr["trafikmelding_md"] = self.component_api.traffic_reports[0]["formated_md"]
+        attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
+        attr["transport_type"] = DICT_TRANSPORT_TYPE[
+            self.component_api.traffic_reports[0]["type"]
+        ]
+        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[0][
+            "createdTime"
+        ]
 
         return attr
 
@@ -134,4 +141,3 @@ class TraficReportSensor(ComponentEntity, SensorEntity):
         self.async_on_remove(
             self.coordinator.async_add_listener(self.async_write_ha_state)
         )
-        await self.component_api.async_init()
