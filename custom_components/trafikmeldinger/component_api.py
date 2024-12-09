@@ -205,13 +205,15 @@ class ComponentApi:
                         # Save last post date to use in next request
                         last_post_date: str = tmp_report["createdTime"]
 
+                    id_found: bool = False
+
                     for report in self.traffic_reports:
                         if report["_id"] == tmp_report["_id"]:
-                            done = True
+                            id_found = True
                             break
 
-                    if done:
-                        break
+                    if id_found:
+                        continue
 
                     tmp_report["region"] = (
                         str(tmp_report["region"]).lower().replace("-", "_")
