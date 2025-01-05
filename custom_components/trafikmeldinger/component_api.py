@@ -129,12 +129,8 @@ class ComponentApi:
 
         # Remove reports older than max_time_back
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            max_time_back: datetime = dt_util.now() - timedelta(
-                hours=self.entry.options[CONF_MAX_TIME_BACK]
-            )
-
             for report in reversed(self.traffic_reports):
-                if report["createdTime"] < max_time_back.isoformat():
+                if await self.async_is_old_trafic_report(report):
                     self.traffic_reports.remove(report)
 
         if self.session is None:
@@ -150,6 +146,22 @@ class ComponentApi:
         return tmp_result
 
     # ------------------------------------------------------
+    async def async_is_old_trafic_report(self, check_report: list) -> bool:
+        """Check of trafic report is to old."""
+
+        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) == 0:
+            return False
+
+        max_time_back: datetime = dt_util.now() - timedelta(
+            hours=self.entry.options[CONF_MAX_TIME_BACK]
+        )
+
+        if check_report["createdTime"] < max_time_back.isoformat():
+            return True
+
+        return False
+
+    # ------------------------------------------------------
     async def async_get_new_trafic_reports(self, last_post_date: str = "") -> bool:
         """Get new trafic report."""
         traffic_report_url: str = (
@@ -159,13 +171,6 @@ class ComponentApi:
         remove_references: bool = True
         done: bool = False
         ret_result: bool = False
-
-        max_time_back: datetime | None = None
-
-        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            max_time_back = dt_util.now() - timedelta(
-                hours=self.entry.options[CONF_MAX_TIME_BACK]
-            )
 
         max_row_fetch: int = int(self.entry.options.get(CONF_MAX_ROW_FETCH, 0))
 
@@ -226,26 +231,20 @@ class ComponentApi:
                         tmp_report["region"] in region
                         and tmp_report["type"] in transport_type
                     ):
-                        if (
-                            max_time_back is not None
-                            and (datetime.fromisoformat(tmp_report["createdTime"]))
-                            < max_time_back
-                        ):
+                        if await self.async_is_old_trafic_report(tmp_report) is False:
                             self.traffic_reports.insert(0, tmp_report)
                             ret_result = True
-                        else:
-                            self.traffic_reports.insert(0, tmp_report)
-                            ret_result = True
+                        elif self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
+                            done = True
+                            break
 
-                        if remove_references:
-                            if tmp_report.get("reference", None) is not None:
-                                for ref_report in reversed(self.traffic_reports):
-                                    if (
-                                        tmp_report["reference"]["_id"]
-                                        == ref_report["_id"]
-                                    ):
-                                        self.traffic_reports.remove(ref_report)
-                                        break
+                if remove_references:
+                    for tmp_report in self.traffic_reports:
+                        if tmp_report.get("reference", None) is not None:
+                            for ref_report in reversed(self.traffic_reports):
+                                if tmp_report["reference"]["_id"] == ref_report["_id"]:
+                                    self.traffic_reports.remove(ref_report)
+                                    break
 
                 self.traffic_reports.sort(key=lambda x: x["createdTime"], reverse=True)
 
