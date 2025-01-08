@@ -59,7 +59,7 @@ class ComponentApi:
 
         self.regex_comp = None
 
-        if len(entry.options.get(CONF_MATCH_LIST)) > 0:
+        if len(entry.options.get(CONF_MATCH_LIST, [])) > 0:
             match_word: str = r"\b" if entry.options.get(CONF_MATCH_WORD, False) else ""
             match_list: list[str] = entry.options.get(CONF_MATCH_LIST)
             reg1 = match_list[0]
