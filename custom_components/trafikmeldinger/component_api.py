@@ -4,6 +4,7 @@ from asyncio import timeout
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import partial
+from re import IGNORECASE, compile
 
 from aiohttp.client import ClientSession
 from babel.dates import format_timedelta
@@ -14,17 +15,16 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_MATCH_CASE,
+    CONF_MATCH_LIST,
+    CONF_MATCH_WORD,
     CONF_MAX_ROW_FETCH,
     CONF_MAX_TIME_BACK,
     CONF_REGION,
     CONF_REGION_ALL,
-    CONF_REGION_CPH,
-    CONF_REGION_MID_NORTH,
-    CONF_REGION_SOUTH,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
-    CONF_TRANSPORT_TYPE_PUBLIC,
     DICT_REGION,
 )
 
@@ -55,6 +55,24 @@ class ComponentApi:
 
         self.request_timeout: int = 10
         self.traffic_reports: list = []
+        self.importan_notices: list = []
+
+        self.regex_comp = None
+
+        if len(entry.options.get(CONF_MATCH_LIST)) > 0:
+            match_word: str = r"\b" if entry.options.get(CONF_MATCH_WORD, False) else ""
+            match_list: list[str] = entry.options.get(CONF_MATCH_LIST)
+            reg1 = match_list[0]
+
+            for reg in match_list[1:]:
+                reg1 += "|" + reg
+            regx = rf"{match_word}({reg1}){match_word}"
+
+            self.regex_comp = (
+                compile(regx)
+                if entry.options.get(CONF_MATCH_CASE, False)
+                else compile(regx, IGNORECASE)
+            )
 
     # ------------------------------------------------------------------
     async def async_relative_time(self, iso_datetime: str) -> str:
@@ -108,7 +126,7 @@ class ComponentApi:
 
             tmp_md += "\n\n" + self.traffic_reports[report_number]["text"]
 
-            if self.traffic_reports[report_number].get("reference", None) is not None:
+            if self.traffic_reports[report_number].get("reference") is not None:
                 tmp_md += (
                     "\n\n>" + self.traffic_reports[report_number]["reference"]["text"]
                 )
@@ -138,6 +156,7 @@ class ComponentApi:
             self.close_session = True
 
         tmp_result: bool = await self.async_get_new_trafic_reports()
+        await self.async_get_important_notices()
 
         if self.session and self.close_session:
             await self.session.close()
@@ -146,7 +165,23 @@ class ComponentApi:
         return tmp_result
 
     # ------------------------------------------------------
-    async def async_is_old_trafic_report(self, check_report: list) -> bool:
+    async def async_is_match_trafic_report(self, check_report: dict) -> bool:
+        """Check of trafic report is a match."""
+
+        if self.regex_comp is None:
+            return True
+
+        tmp_txt: str = check_report["text"]
+
+        if check_report.get("reference") is not None:
+            tmp_txt += check_report["reference"]["text"]
+
+        if self.regex_comp.search(tmp_txt):
+            return True
+        return False
+
+    # ------------------------------------------------------
+    async def async_is_old_trafic_report(self, check_report: dict) -> bool:
         """Check of trafic report is to old."""
 
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) == 0:
@@ -164,9 +199,6 @@ class ComponentApi:
     # ------------------------------------------------------
     async def async_get_new_trafic_reports(self, last_post_date: str = "") -> bool:
         """Get new trafic report."""
-        traffic_report_url: str = (
-            f"https://api.dr.dk/trafik/posts?lastPostDate={last_post_date}"
-        )
 
         remove_references: bool = True
         done: bool = False
@@ -177,22 +209,25 @@ class ComponentApi:
         if max_row_fetch == 0:
             max_row_fetch = 40
 
-        region: list = self.entry.options.get(CONF_REGION, [CONF_REGION_ALL])
+        region_part_url: str = ""
+        transport_type_part_url: str = ""
 
-        if len(region) == 0 or (len(region) == 1 and region[0] == CONF_REGION_ALL):
-            region: list = [CONF_REGION_CPH, CONF_REGION_MID_NORTH, CONF_REGION_SOUTH]
+        region: list = self.entry.options.get(CONF_REGION, [])
 
-        transport_type: list = self.entry.options.get(
-            CONF_TRANSPORT_TYPE, [CONF_TRANSPORT_TYPE_ALL]
-        )
+        reg: str
+        for reg in region:
+            if reg != CONF_REGION_ALL:
+                region_part_url += f"regions%5B%5D={reg.upper().replace('_', '-')}&"
 
-        if len(transport_type) == 0 or (
-            len(transport_type) == 1 and transport_type[0] == CONF_TRANSPORT_TYPE_ALL
-        ):
-            transport_type: list = [
-                CONF_TRANSPORT_TYPE_PRIVATE,
-                CONF_TRANSPORT_TYPE_PUBLIC,
-            ]
+        transport_type: list = self.entry.options.get(CONF_TRANSPORT_TYPE, [])
+
+        for reg in transport_type:
+            if reg != CONF_TRANSPORT_TYPE_ALL:
+                transport_type_part_url += (
+                    f"type%5B%5D={reg.upper().replace('_', '-')}&"
+                )
+
+        traffic_report_url: str = f"https://api.dr.dk/trafik/posts?{region_part_url}{transport_type_part_url}lastPostDate={last_post_date}"
 
         try:
             async with timeout(self.request_timeout):
@@ -203,6 +238,8 @@ class ComponentApi:
                     done = True
 
                 first_loop: bool = True
+
+                tmp_report: dict
 
                 for tmp_report in reversed(tmp_json):
                     if first_loop:
@@ -227,20 +264,18 @@ class ComponentApi:
                         str(tmp_report["type"]).lower().replace("-", "_")
                     )
 
-                    if (
-                        tmp_report["region"] in region
-                        and tmp_report["type"] in transport_type
-                    ):
-                        if await self.async_is_old_trafic_report(tmp_report) is False:
-                            self.traffic_reports.insert(0, tmp_report)
-                            ret_result = True
-                        elif self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-                            done = True
-                            break
+                    if await self.async_is_old_trafic_report(
+                        tmp_report
+                    ) is False and await self.async_is_match_trafic_report(tmp_report):
+                        self.traffic_reports.insert(0, tmp_report)
+                        ret_result = True
+                    elif self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
+                        done = True
+                        break
 
                 if remove_references:
                     for tmp_report in self.traffic_reports:
-                        if tmp_report.get("reference", None) is not None:
+                        if tmp_report.get("reference") is not None:
                             for ref_report in reversed(self.traffic_reports):
                                 if tmp_report["reference"]["_id"] == ref_report["_id"]:
                                     self.traffic_reports.remove(ref_report)
@@ -262,6 +297,27 @@ class ComponentApi:
                 ret_result = True
 
         return ret_result
+
+    # ------------------------------------------------------
+    async def async_get_important_notices(self) -> bool:
+        """Get important notices."""
+        important_notices_url: str = "https://api.dr.dk/trafik/notices"
+
+        try:
+            async with timeout(self.request_timeout):
+                response = await self.session.get(important_notices_url)
+                tmp_json: list = await response.json()
+
+                if len(tmp_json) == 0:
+                    self.importan_notices.clear()
+                    return False
+
+                self.importan_notices = tmp_json
+
+        except TimeoutError:
+            pass
+
+        return True
 
     # ------------------------------------------------------------------
     async def update_config(self) -> None:

@@ -19,6 +19,7 @@
     },
     "step": {
       "user": {
+        "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
           "transport_type": "Transporttype",
@@ -27,6 +28,18 @@
           "scroll_messages_every_minutes": "Scroll besked hver",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløserr",
           "restart_timer": "Genstart Timer hjælper automatisk"
+        }
+      },
+      "user_match": {
+        "title": "Trafikmeldinger",
+        "description": "Match teksten i trafikrapporterne",
+        "data": {
+          "match_case": "Match store og små bogstaver",
+          "match_word": "Match hele ordet/udtryk",
+          "match_list": "Match liste"
+        },
+        "data_description": {
+          "match_list": "A very complicated option which does abc"
         }
       }
     }
@@ -40,6 +53,7 @@
     },
     "step": {
       "init": {
+        "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
           "transport_type": "Transport type",
@@ -48,6 +62,18 @@
           "scroll_messages_every_minutes": "Scroll besked hver",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløser",
           "restart_timer": "Genstart Timer hjælper automatisk"
+        }
+      },
+      "init_match": {
+        "title": "Trafikmeldinger",
+        "description": "Match teksten i trafikrapporterne",
+        "data": {
+          "match_case": "Match store og små bogstaver",
+          "match_word": "Match hele ordet/udtryk",
+          "match_list": "Match liste"
+        },
+        "data_description": {
+          "match_list": "A very complicated option which does abc"
         }
       },
       "extra": {

@@ -45,3 +45,8 @@ CONF_MAX_ROW_FETCH = "max_row_fetch"
 CONF_SCROLL_MESSAGES_EVERY_MINUTES: str = "scroll_messages_every_minutes"
 CONF_RESTART_TIMER = "restart_timer"
 CONF_LISTEN_TO_TIMER_TRIGGER = "listen_to_timer_trigger"
+
+CONF_MATCH = "match"
+CONF_MATCH_CASE = "match_case"
+CONF_MATCH_WORD = "match_word"
+CONF_MATCH_LIST = "match_list"

@@ -19,6 +19,7 @@
     },
     "step": {
       "user": {
+        "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
           "transport_type": "Transport type",
@@ -27,6 +28,18 @@
           "scroll_messages_every_minutes": "Scroll messages every",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
+        }
+      },
+      "user_match": {
+        "title": "Trafikmeldinger",
+        "description": "Match the text in the traffic reports",
+        "data": {
+          "match_case": "Match case",
+          "match_word": "Match the whole word",
+          "match_list": "Match list"
+        },
+        "data_description": {
+          "match_list": "A very complicated option which does abc"
         }
       }
     }
@@ -40,6 +53,7 @@
     },
     "step": {
       "init": {
+        "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
           "transport_type": "Transport type",
@@ -48,6 +62,18 @@
           "scroll_messages_every_minutes": "Scroll messages every",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
+        }
+      },
+      "init_match": {
+        "title": "Trafikmeldinger",
+        "description": "Match the text in the traffic reports",
+        "data": {
+          "match_case": "Match case",
+          "match_word": "Match the whole word",
+          "match_list": "Match list"
+        },
+        "data_description": {
+          "match_list": "A very complicated option which does abc"
         }
       },
       "extra": {

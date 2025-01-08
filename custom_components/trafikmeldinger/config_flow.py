@@ -7,6 +7,7 @@ from typing import Any, cast
 
 import voluptuous as vol
 
+# from homeassistant.data_entry_flow import section
 #  from homeassistant import config_entries
 from homeassistant.helpers.schema_config_entry_flow import (
     SchemaCommonFlowHandler,
@@ -23,10 +24,15 @@ from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
+    TextSelector,
+    TextSelectorConfig,
 )
 
 from .const import (
     CONF_LISTEN_TO_TIMER_TRIGGER,
+    CONF_MATCH_CASE,
+    CONF_MATCH_LIST,
+    CONF_MATCH_WORD,
     CONF_MAX_ROW_FETCH,
     CONF_MAX_TIME_BACK,
     CONF_REGION,
@@ -140,9 +146,24 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
     }
 )
 
+CONFIG_OPTIONS_SCHEMA_MATCH = vol.Schema(
+    {
+        vol.Optional(CONF_MATCH_LIST, default=[]): TextSelector(
+            TextSelectorConfig(multiple=True)
+        ),
+        vol.Optional(CONF_MATCH_CASE, default=False): bool,
+        vol.Optional(CONF_MATCH_WORD, default=False): bool,
+    }
+)
+
 CONFIG_FLOW = {
     "user": SchemaFlowFormStep(
         CONFIG_OPTIONS_SCHEMA,
+        next_step="user_match",
+        validate_user_input=_validate_input,
+    ),
+    "user_match": SchemaFlowFormStep(
+        CONFIG_OPTIONS_SCHEMA_MATCH,
         validate_user_input=_validate_input,
     ),
 }
@@ -150,6 +171,11 @@ CONFIG_FLOW = {
 OPTIONS_FLOW = {
     "init": SchemaFlowFormStep(
         CONFIG_OPTIONS_SCHEMA,
+        validate_user_input=_validate_input,
+        next_step="init_match",
+    ),
+    "init_match": SchemaFlowFormStep(
+        CONFIG_OPTIONS_SCHEMA_MATCH,
         validate_user_input=_validate_input,
     ),
 }
