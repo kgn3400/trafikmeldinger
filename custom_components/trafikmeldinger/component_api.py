@@ -235,7 +235,8 @@ class ComponentApi:
                 tmp_json: list = await response.json()
 
                 if len(tmp_json) == 0 or (
-                    len(tmp_json) > 0 and self.async_is_old_trafic_report(tmp_json[0])
+                    len(tmp_json) > 0
+                    and await self.async_is_old_trafic_report(tmp_json[0])
                 ):
                     return False
 
