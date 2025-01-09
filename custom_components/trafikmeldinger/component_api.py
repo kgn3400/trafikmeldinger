@@ -234,8 +234,10 @@ class ComponentApi:
                 response = await self.session.get(traffic_report_url)
                 tmp_json: list = await response.json()
 
-                if len(tmp_json) == 0:
-                    done = True
+                if len(tmp_json) == 0 or (
+                    len(tmp_json) > 0 and self.async_is_old_trafic_report(tmp_json[0])
+                ):
+                    return False
 
                 first_loop: bool = True
 
@@ -269,9 +271,6 @@ class ComponentApi:
                     ) is False and await self.async_is_match_trafic_report(tmp_report):
                         self.traffic_reports.insert(0, tmp_report)
                         ret_result = True
-                    elif self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-                        done = True
-                        break
 
                 if remove_references:
                     for tmp_report in self.traffic_reports:
