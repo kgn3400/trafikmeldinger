@@ -93,80 +93,97 @@ class ComponentApi:
         return diff_str
 
     # ------------------------------------------------------
-    async def async_trafic_report_format(self, report_number: int) -> str:
-        """Trafic report format."""
+    async def async_traffic_report_format(self, report: dict) -> str:
+        """Format traffic report."""
 
-        if report_number < len(self.traffic_reports):
-            return self.traffic_reports[report_number]["text"][:255]
-
-        return ""
+        return report["text"][:255]
 
     # ------------------------------------------------------
-    async def async_trafic_report_format_md(self, report_number: int) -> str:
-        """Trafic report format markdown."""
+    async def async_traffic_report_format_md(self, report: dict) -> str:
+        """Format traffic report as markdown."""
 
         tmp_md: str = ""
 
-        if report_number < len(self.traffic_reports):
-            if (
-                self.traffic_reports[report_number]["type"]
-                == CONF_TRANSPORT_TYPE_PRIVATE
-            ):
-                tmp_md = (
-                    '###  <font color=red> <ha-icon icon="mdi:car"></ha-icon></font> '
-                )
-            else:
-                tmp_md = '###  <font color=red> <ha-icon icon="mdi:train-bus"></ha-icon></font> '
-
-            tmp_md += DICT_REGION[self.traffic_reports[report_number]["region"]]
-
-            tmp_md += " " + await self.async_relative_time(
-                self.traffic_reports[report_number]["createdTime"]
+        if report["type"] == CONF_TRANSPORT_TYPE_PRIVATE:
+            tmp_md = '###  <font color=red> <ha-icon icon="mdi:car"></ha-icon></font> '
+        else:
+            tmp_md = (
+                '###  <font color=red> <ha-icon icon="mdi:train-bus"></ha-icon></font> '
             )
 
-            tmp_md += "\n\n" + self.traffic_reports[report_number]["text"]
+        tmp_md += DICT_REGION[report["region"]]
 
-            if self.traffic_reports[report_number].get("reference") is not None:
-                tmp_md += (
-                    "\n\n>" + self.traffic_reports[report_number]["reference"]["text"]
-                )
+        tmp_md += " " + await self.async_relative_time(report["createdTime"])
+
+        tmp_md += "\n\n" + report["text"]
+
+        if report.get("reference") is not None:
+            tmp_md += "\n\n>" + str(report["reference"]["text"]).replace("\n\n", "\n")
 
         return tmp_md
 
     # ------------------------------------------------------
-    async def async_formatted_trafic_reports(self) -> None:
-        """Refresh trafic report."""
+    async def async_important_notice_format(self, report: dict) -> str:
+        """Format important notice."""
 
-        for x, report in enumerate(self.traffic_reports):
-            report["formated_text"] = await self.async_trafic_report_format(x)
-            report["formated_md"] = await self.async_trafic_report_format_md(x)
+        return report["text"][:255]
 
     # ------------------------------------------------------
-    async def async_refresh_trafic_reports(self) -> bool:
-        """Refresh trafic report."""
+    async def async_important_notice_format_md(self, report: dict) -> str:
+        """Format important notice as markdown."""
+
+        tmp_md: str = ""
+
+        tmp_md += " " + await self.async_relative_time(report["createdTime"])
+
+        tmp_md += "\n\n" + report["text"]
+
+        return tmp_md
+
+    # ------------------------------------------------------
+    async def async_formatted_traffic_reports(self) -> None:
+        """Format traffic report."""
+
+        for report in self.traffic_reports:
+            report["formated_text"] = await self.async_traffic_report_format(report)
+            report["formated_md"] = await self.async_traffic_report_format_md(report)
+
+    # ------------------------------------------------------
+    async def async_formatted_important_notices(self) -> None:
+        """Format notices."""
+
+        for notice in self.importan_notices:
+            notice["formated_text"] = await self.async_important_notice_format(notice)
+            notice["formated_md"] = await self.async_important_notice_format_md(notice)
+
+    # ------------------------------------------------------
+    async def async_refresh_traffic_reports(self) -> bool:
+        """Refresh traffic report."""
 
         # Remove reports older than max_time_back
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
             for report in reversed(self.traffic_reports):
-                if await self.async_is_old_trafic_report(report):
+                if await self.async_is_old_traffic_report(report):
                     self.traffic_reports.remove(report)
 
         if self.session is None:
             self.session = ClientSession()
             self.close_session = True
 
-        tmp_result: bool = await self.async_get_new_trafic_reports()
+        tmp_result: bool = await self.async_get_new_traffic_reports()
+        await self.async_formatted_traffic_reports()
+
         await self.async_get_important_notices()
+        await self.async_formatted_important_notices()
 
         if self.session and self.close_session:
             await self.session.close()
 
-        await self.async_formatted_trafic_reports()
         return tmp_result
 
     # ------------------------------------------------------
-    async def async_is_match_trafic_report(self, check_report: dict) -> bool:
-        """Check of trafic report is a match."""
+    async def async_is_match_traffic_report(self, check_report: dict) -> bool:
+        """Check of traffic report is a match."""
 
         if self.regex_comp is None:
             return True
@@ -181,8 +198,8 @@ class ComponentApi:
         return False
 
     # ------------------------------------------------------
-    async def async_is_old_trafic_report(self, check_report: dict) -> bool:
-        """Check of trafic report is to old."""
+    async def async_is_old_traffic_report(self, check_report: dict) -> bool:
+        """Check of traffic report is to old."""
 
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) == 0:
             return False
@@ -197,8 +214,8 @@ class ComponentApi:
         return False
 
     # ------------------------------------------------------
-    async def async_get_new_trafic_reports(self, last_post_date: str = "") -> bool:
-        """Get new trafic report."""
+    async def async_get_new_traffic_reports(self, last_post_date: str = "") -> bool:
+        """Get new traffic report."""
 
         remove_references: bool = True
         done: bool = False
@@ -236,7 +253,7 @@ class ComponentApi:
 
                 if len(tmp_json) == 0 or (
                     len(tmp_json) > 0
-                    and await self.async_is_old_trafic_report(tmp_json[0])
+                    and await self.async_is_old_traffic_report(tmp_json[0])
                 ):
                     return False
 
@@ -267,9 +284,9 @@ class ComponentApi:
                         str(tmp_report["type"]).lower().replace("-", "_")
                     )
 
-                    if await self.async_is_old_trafic_report(
+                    if await self.async_is_old_traffic_report(
                         tmp_report
-                    ) is False and await self.async_is_match_trafic_report(tmp_report):
+                    ) is False and await self.async_is_match_traffic_report(tmp_report):
                         self.traffic_reports.insert(0, tmp_report)
                         ret_result = True
 
@@ -293,7 +310,7 @@ class ComponentApi:
             pass
 
         if not done:
-            if await self.async_get_new_trafic_reports(last_post_date) is True:
+            if await self.async_get_new_traffic_reports(last_post_date) is True:
                 ret_result = True
 
         return ret_result
