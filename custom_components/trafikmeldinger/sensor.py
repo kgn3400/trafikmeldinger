@@ -79,7 +79,6 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        xx = self.hass.is_running
         if len(self.component_api.traffic_reports) == 0:
             return None
         return self.component_api.traffic_reports[0]["formated_text"]
@@ -215,8 +214,8 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         if len(self.component_api.importan_notices) == 0:
             return attr
 
-        attr["vigtig_besked_md"] = self.component_api.traffic_reports[0]["formated_md"]
-        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[0][
+        attr["vigtig_besked_md"] = self.component_api.importan_notices[0]["formated_md"]
+        attr["oprettet_tidspunkt"] = self.component_api.importan_notices[0][
             "createdTime"
         ]
 

@@ -132,9 +132,12 @@ class ComponentApi:
     async def async_important_notice_format_md(self, report: dict) -> str:
         """Format important notice as markdown."""
 
-        tmp_md: str = ""
+        tmp_md: str = '###  <font color=red> <ha-icon icon="mdi:exclamation-thick"></ha-icon></font> '
 
-        tmp_md += " " + await self.async_relative_time(report["createdTime"])
+        tmp_md += (
+            " "
+            + str(await self.async_relative_time(report["createdTime"])).capitalize()
+        )
 
         tmp_md += "\n\n" + report["text"]
 
