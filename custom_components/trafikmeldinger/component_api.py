@@ -176,7 +176,20 @@ class ComponentApi:
         tmp_result: bool = await self.async_get_new_traffic_reports()
         await self.async_formatted_traffic_reports()
 
-        await self.async_get_important_notices()
+        if self.session and self.close_session:
+            await self.session.close()
+
+        return tmp_result
+
+    # ------------------------------------------------------
+    async def async_refresh_important_notices(self) -> bool:
+        """Refresh important notices."""
+
+        if self.session is None:
+            self.session = ClientSession()
+            self.close_session = True
+
+        tmp_result: bool = await self.async_get_important_notices()
         await self.async_formatted_important_notices()
 
         if self.session and self.close_session:

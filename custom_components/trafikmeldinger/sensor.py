@@ -172,8 +172,8 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
     # ------------------------------------------------------
     async def async_refresh(self) -> None:
         """Refresh."""
-        # if await self.component_api.async_refresh_traffic_reports():
-        #     self.async_write_ha_state()
+        if await self.component_api.async_refresh_important_notices():
+            self.async_write_ha_state()
 
     # ------------------------------------------------------
     @property
