@@ -41,7 +41,6 @@ from .const import (
     CONF_REGION_MID_NORTH,
     CONF_REGION_SOUTH,
     CONF_RESTART_TIMER,
-    CONF_SCROLL_MESSAGES_EVERY_MINUTES,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -120,18 +119,6 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
                 max=48,
                 mode=NumberSelectorMode.BOX,
                 unit_of_measurement="rækker",
-            )
-        ),
-        vol.Required(
-            CONF_SCROLL_MESSAGES_EVERY_MINUTES,
-            default=0.5,
-        ): NumberSelector(
-            NumberSelectorConfig(
-                min=0.5,
-                max=696,
-                step=1,
-                mode=NumberSelectorMode.BOX,
-                unit_of_measurement="minutes",
             )
         ),
         vol.Optional(

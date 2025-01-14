@@ -11,7 +11,6 @@ from babel.dates import format_timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -38,14 +37,12 @@ class ComponentApi:
     def __init__(
         self,
         hass: HomeAssistant,
-        coordinator: DataUpdateCoordinator,
         entry: ConfigEntry,
         session: ClientSession | None,
     ) -> None:
         """Trafikmeldinger api."""
 
         self.hass: HomeAssistant = hass
-        self.coordinator: DataUpdateCoordinator = coordinator
         self.entry: ConfigEntry = entry
         self.session: ClientSession | None = session
 
@@ -58,6 +55,7 @@ class ComponentApi:
         self.importan_notices: list = []
 
         self.regex_comp = None
+        self.traffic_report_rotate_pos: int = -1
 
         if len(entry.options.get(CONF_MATCH_LIST, [])) > 0:
             match_word: str = r"\b" if entry.options.get(CONF_MATCH_WORD, False) else ""
@@ -353,15 +351,18 @@ class ComponentApi:
         return True
 
     # ------------------------------------------------------------------
-    async def update_config(self) -> None:
-        """Update config."""
+    def get_next_traffic_report_pos(self) -> int:
+        """Get next traffic report position."""
 
-        # tmp_options: dict[str, Any] = self.entry.options.copy()
-        # tmp_options[CONF_MSG] = self.msg
-        # tmp_options[CONF_CONTENT] = self.content
-        # tmp_options[CONF_IS_ON] = self.is_on
-        # self.supress_update_listener = True
+        if len(self.traffic_reports) == 0:
+            self.traffic_report_rotate_pos = -1
 
-        # self.hass.config_entries.async_update_entry(
-        #     self.entry, data=tmp_options, options=tmp_options
-        # )
+        elif len(self.traffic_reports) == 1:
+            self.traffic_report_rotate_pos = 0
+        else:
+            self.traffic_report_rotate_pos += 1
+
+            if self.traffic_report_rotate_pos > (len(self.traffic_reports) - 1):
+                self.traffic_report_rotate_pos = 0
+
+        return self.traffic_report_rotate_pos

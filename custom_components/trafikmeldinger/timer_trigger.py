@@ -1,6 +1,7 @@
 """Timer trigger class."""
 
 from datetime import datetime
+import inspect
 
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import CALLBACK_TYPE, Event, State, callback
@@ -70,7 +71,10 @@ class TimerTrigger:
                     "entity": self.entity.entity_id,
                 },
             )
-            await self.callback_trigger(True)
+            if inspect.iscoroutinefunction(self.callback_trigger):
+                await self.callback_trigger(self.error)
+            else:
+                self.callback_trigger(self.error)
 
             return False
 
@@ -110,7 +114,11 @@ class TimerTrigger:
             if self.auto_restart:
                 if await self.async_validate_timer():
                     await self.async_restart_timer()
-        await self.callback_trigger(self.error)
+
+        if inspect.iscoroutinefunction(self.callback_trigger):
+            await self.callback_trigger(self.error)
+        else:
+            self.callback_trigger(self.error)
 
     # ------------------------------------------------------
     async def async_hass_started(self, _event: Event) -> None:

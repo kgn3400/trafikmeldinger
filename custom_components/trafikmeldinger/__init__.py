@@ -8,10 +8,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+# from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .component_api import ComponentApi
-from .const import DOMAIN, LOGGER
+
+# from .const import DOMAIN, LOGGER
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
@@ -23,7 +24,7 @@ class CommonData:
     """Common data."""
 
     component_api: ComponentApi
-    coordinator: DataUpdateCoordinator
+    # coordinator: DataUpdateCoordinator
 
 
 # The type alias needs to be suffixed with 'ConfigEntry'
@@ -34,15 +35,14 @@ type CommonConfigEntry = ConfigEntry[CommonData]
 async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bool:
     """Set up Trafikmeldinger from a config entry."""
 
-    coordinator: DataUpdateCoordinator = DataUpdateCoordinator(
-        hass,
-        LOGGER,
-        name=DOMAIN,
-    )
+    # coordinator: DataUpdateCoordinator = DataUpdateCoordinator(
+    #     hass,
+    #     LOGGER,
+    #     name=DOMAIN,
+    # )
 
     component_api: ComponentApi = ComponentApi(
         hass,
-        coordinator,
         entry,
         async_get_clientsession(hass),
     )
@@ -50,12 +50,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
     entry.async_on_unload(entry.add_update_listener(update_listener))
     entry.runtime_data = CommonData(
         component_api=component_api,
-        coordinator=coordinator,
+        # coordinator=coordinator,
     )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    await coordinator.async_config_entry_first_refresh()
+    # await coordinator.async_config_entry_first_refresh()
 
     return True
 

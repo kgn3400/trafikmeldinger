@@ -25,7 +25,6 @@
           "transport_type": "Transport type",
           "max_time_back": "Maximum hours back",
           "max_row_fetch": "Maximum reports to fetch",
-          "scroll_messages_every_minutes": "Scroll messages every",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
         }
@@ -59,7 +58,6 @@
           "transport_type": "Transport type",
           "max_time_back": "Maximum hours back",
           "max_row_fetch": "Maximum reports to fetch",
-          "scroll_messages_every_minutes": "Scroll messages every",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
         }

@@ -42,7 +42,6 @@ DICT_TRANSPORT_TYPE = {
 CONF_MAX_TIME_BACK = "max_time_back"
 CONF_MAX_ROW_FETCH = "max_row_fetch"
 
-CONF_SCROLL_MESSAGES_EVERY_MINUTES: str = "scroll_messages_every_minutes"
 CONF_RESTART_TIMER = "restart_timer"
 CONF_LISTEN_TO_TIMER_TRIGGER = "listen_to_timer_trigger"
 

@@ -25,7 +25,6 @@
           "transport_type": "Transporttype",
           "max_time_back": "Hent max timer tilabge",
           "max_row_fetch": "Hent max meldinger",
-          "scroll_messages_every_minutes": "Scroll besked hver",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløserr",
           "restart_timer": "Genstart Timer hjælper automatisk"
         }
@@ -59,7 +58,6 @@
           "transport_type": "Transport type",
           "max_time_back": "Hent max timer tilabge",
           "max_row_fetch": "Hent max meldinger",
-          "scroll_messages_every_minutes": "Scroll besked hver",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløser",
           "restart_timer": "Genstart Timer hjælper automatisk"
         }
