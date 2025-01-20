@@ -1,0 +1,16 @@
+# Service ID
+mark_all_as_read:
+# Service ID
+mark_all_traffic_reports_as_read:
+# Service ID
+mark_all_important_notices_as_read:
+# Service ID
+mark_latest_traffic_report_as_read:
+# Service ID
+mark_latest_important_notice_as_read:
+# Service ID
+mark_current_traffic_report_as_read:
+# Service ID
+mark_current_important_notice_as_read:
+# Service ID
+rotate_to_next_traffic_report:

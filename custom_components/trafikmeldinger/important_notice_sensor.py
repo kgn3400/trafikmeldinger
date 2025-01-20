@@ -6,7 +6,7 @@ from datetime import timedelta
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import MATCH_ALL
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import CommonConfigEntry
@@ -29,14 +29,6 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         entry: CommonConfigEntry,
     ) -> None:
         """Trafikmeldinger sensor."""
-        # self.coordinator: DataUpdateCoordinator = DataUpdateCoordinator(
-        #     hass,
-        #     LOGGER,
-        #     name=DOMAIN,
-        #     update_interval=timedelta(minutes=1),
-        #     update_method=self.async_refresh,
-        # )
-
         self.hass: HomeAssistant = hass
         self.entry: CommonConfigEntry = entry
 
@@ -53,13 +45,28 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         self.component_api: ComponentApi = entry.runtime_data.component_api
 
-        self.coordinator.update_interval = timedelta(minutes=1)
+        self.coordinator.update_interval = timedelta(minutes=5)
         self.coordinator.update_method = self.async_refresh
 
         self._name = "Vigtig besked"
         self._unique_id = "vigtig_besked"
 
         self.translation_key = TRANSLATION_KEY
+
+        """Setup the actions for the trafikmelding integration."""
+        hass.services.async_register(
+            DOMAIN,
+            "mark_all_important_notices_as_read",
+            self.async_mark_all_important_notices_as_read_service,
+        )
+
+    # ------------------------------------------------------------------
+    async def async_mark_all_important_notices_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Mark all important notices as read."""
+        self.component_api.mark_all_important_notices_as_read()
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------
     async def async_refresh(self) -> None:
@@ -87,8 +94,12 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.importan_notices) == 0:
+        if len(self.component_api.importan_notices) == 0 or (
+            len(self.component_api.importan_notices) > 0
+            and self.component_api.importan_notices[0]["read"]
+        ):
             return None
+
         return self.component_api.importan_notices[0]["formated_text"]
 
     # ------------------------------------------------------
@@ -103,7 +114,10 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.importan_notices) == 0:
+        if len(self.component_api.importan_notices) == 0 or (
+            len(self.component_api.importan_notices) > 0
+            and self.component_api.importan_notices[0]["read"]
+        ):
             return attr
 
         attr["vigtig_besked_md"] = self.component_api.importan_notices[0]["formated_md"]

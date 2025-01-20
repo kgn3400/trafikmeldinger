@@ -6,7 +6,7 @@ from datetime import timedelta
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import MATCH_ALL
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import CommonConfigEntry
@@ -38,13 +38,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         entry: CommonConfigEntry,
     ) -> None:
         """Trafikmeldinger sensor."""
-        # self.coordinator: DataUpdateCoordinator = DataUpdateCoordinator(
-        #     hass,
-        #     LOGGER,
-        #     name=DOMAIN,
-        #     update_interval=timedelta(minutes=1),
-        #     update_method=self.async_refresh,
-        # )
+
         self.hass = hass
         self.entry: CommonConfigEntry = entry
 
@@ -53,20 +47,80 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
                 hass,
                 LOGGER,
                 name=DOMAIN,
-                # update_interval=timedelta(minutes=1),
-                # update_method=self.async_refresh,
             ),
             entry,
         )
         self.component_api: ComponentApi = entry.runtime_data.component_api
 
-        self.coordinator.update_interval = timedelta(minutes=1)
+        self.coordinator.update_interval = timedelta(minutes=2)
         self.coordinator.update_method = self.async_refresh
 
         self._name = "Seneste"
         self._unique_id = "seneste"
 
         self.translation_key = TRANSLATION_KEY
+
+        """Setup the actions for the trafikmelding integration."""
+        hass.services.async_register(
+            DOMAIN,
+            "mark_all_as_read",
+            self.async_mark_all_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            "mark_all_traffic_reports_as_read",
+            self.async_mark_all_traffic_reports_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            "mark_latest_traffic_report_as_read",
+            self.async_mark_latest_traffic_report_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            "mark_current_traffic_report_as_read",
+            self.async_mark_current_traffic_report_as_read_service,
+        )
+
+    # ------------------------------------------------------------------
+    async def async_mark_all_as_read_service(self, call: ServiceCall) -> None:
+        """Mark all as read."""
+        await self.hass.services.async_call(
+            DOMAIN,
+            "mark_all_important_notices_as_read",
+        )
+
+        self.component_api.mark_all_traffic_reports_as_read()
+
+        await self.hass.services.async_call(
+            DOMAIN,
+            "rotate_to_next_traffic_report",
+        )
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
+    async def async_mark_all_traffic_reports_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Mark all traffic reports as read."""
+        self.component_api.mark_all_traffic_reports_as_read()
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
+    async def async_mark_latest_traffic_report_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Mark latest traffic report as read."""
+        self.component_api.mark_traffic_report_as_read(0)
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
+    async def async_mark_current_traffic_report_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Mark latest traffic report as read."""
+        self.component_api.mark_current_traffic_report_as_read()
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------
     async def async_refresh(self) -> None:
@@ -95,8 +149,12 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.traffic_reports) == 0:
+        if len(self.component_api.traffic_reports) == 0 or (
+            len(self.component_api.traffic_reports) > 0
+            and self.component_api.traffic_reports[0]["read"]
+        ):
             return None
+
         return self.component_api.traffic_reports[0]["formated_text"]
 
     # ------------------------------------------------------
@@ -111,8 +169,12 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.traffic_reports) == 0:
+        if len(self.component_api.traffic_reports) == 0 or (
+            len(self.component_api.traffic_reports) > 0
+            and self.component_api.traffic_reports[0]["read"]
+        ):
             return attr
+
         attr["trafikmelding_md"] = self.component_api.traffic_reports[0]["formated_md"]
         attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
         attr["transport_type"] = DICT_TRANSPORT_TYPE[
@@ -175,11 +237,6 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         entry: CommonConfigEntry,
     ) -> None:
         """Trafikmeldinger sensor."""
-        # self.coordinator: DataUpdateCoordinator = DataUpdateCoordinator(
-        #     hass,
-        #     LOGGER,
-        #     name=DOMAIN,
-        # )
 
         self.hass: HomeAssistant = hass
         self.entry: CommonConfigEntry = entry
@@ -208,6 +265,20 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
                 self.async_refresh,
                 entry.options.get(CONF_RESTART_TIMER, False),
             )
+
+        hass.services.async_register(
+            DOMAIN,
+            "rotate_to_next_traffic_report",
+            self.async_rotate_to_next_traffic_report_service,
+        )
+
+    # ------------------------------------------------------------------
+    async def async_rotate_to_next_traffic_report_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Mark all as read."""
+        self.component_api.get_next_traffic_report_pos()
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------
     async def async_refresh_dummy(self) -> None:
