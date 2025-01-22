@@ -15,6 +15,6 @@
   ],
   "single_config_entry": true,
   "ssdp": [],
-  "version": "1.0.12",
+  "version": "1.0.13",
   "zeroconf": []
 }

@@ -17,4 +17,3 @@ Or click
 ## Configuration
 
 Configuration is setup via UI in Home assistant. To add one, go to [Settings > Devices & Services](https://my.home-assistant.io/redirect/integrations) and click the add button. Next choose the [Trafikmeldinger](https://my.home-assistant.io/redirect/config_flow_start?domain=trafikmeldinger) option.
-

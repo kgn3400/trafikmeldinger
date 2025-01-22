@@ -168,17 +168,12 @@ class ComponentApi:
     async def async_refresh_traffic_reports(self) -> bool:
         """Refresh traffic report."""
 
-        # Remove reports older than max_time_back
-        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            for report in reversed(self.traffic_reports):
-                if await self.async_is_old_report(report):
-                    self.traffic_reports.remove(report)
-
         if self.session is None:
             self.session = ClientSession()
             self.close_session = True
 
         tmp_result: bool = await self.async_get_new_traffic_reports()
+
         await self.async_formatted_traffic_reports()
 
         if self.session and self.close_session:
@@ -231,7 +226,7 @@ class ComponentApi:
         return False
 
     # ------------------------------------------------------
-    async def async_get_new_traffic_reports(self, last_post_date: str = "") -> bool:
+    async def async_get_new_traffic_reports(self, last_post_date: str = "") -> bool:  # noqa: C901
         """Get new traffic report."""
 
         remove_references: bool = True
@@ -330,6 +325,13 @@ class ComponentApi:
             if await self.async_get_new_traffic_reports(last_post_date) is True:
                 ret_result = True
 
+        # Remove reports older than max_time_back
+        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
+            for report in reversed(self.traffic_reports):
+                if await self.async_is_old_report(report):
+                    self.traffic_reports.remove(report)
+                    ret_result = True
+
         return ret_result
 
     # ------------------------------------------------------
@@ -372,6 +374,7 @@ class ComponentApi:
             for report in reversed(self.importan_notices):
                 if await self.async_is_old_report(report):
                     self.importan_notices.remove(report)
+                    ret_result = True
 
         return ret_result
 
