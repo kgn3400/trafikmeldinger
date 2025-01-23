@@ -20,3 +20,4 @@ Tilføj Trafikmeldinger integrationen til Home Assistant.
 ## Konfiguration
 
 Konfiguration opsættes via brugergrænsefladen i Home Assistant. For at tilføje en, gå til [Indstillinger > Enheder & tjenester](https://my.home-assistant.io/redirect/integrations) og tryk på [Tilføj integration knappen](https://my.home-assistant.io/redirect/integrations). Vælg derefter [Trafikmeldinger](https://my.home-assistant.io/redirect/config_flow_start?domain=trafikmeldinger) option.
+![Config][]
