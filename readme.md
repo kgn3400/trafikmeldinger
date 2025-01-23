@@ -27,6 +27,8 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant. For at tilføj
 
 ## Markdown attribut
 
-![Markdown attribut](https://github.com/kgn3400/trafikmeldinger/blob/main/images/md_card_config.png)
+![Markdown attribut](https://github.com/kgn3400/trafikmeldinger/blob/main/images/md_card_config.jpeg)
 
 ![Markdown attribut](https://github.com/kgn3400/trafikmeldinger/blob/main/images/md_card.png)
+
+## Aktions
