@@ -47,6 +47,4 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 {{ state_attr('sensor.trafikmeldinger_vigtig_besked', 'vigtig_besked_md') }}
 ```
 
-![Markdown attribut](/assets/md_card.png)
-
 ## Aktions
