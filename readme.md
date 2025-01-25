@@ -11,7 +11,7 @@ Trafikmeldinger-integrationen giver dig mulighed for at se vigtige trafikmelding
 ## Installation
 
 For installationsvejledning, indtil Trafikmeldinger-integrationen bliver en del af HACS, [se denne guide](https://hacs.xyz/docs/faq/custom_repositories).
-Eller klik
+Eller klik på
 [![My Home Assistant](https://img.shields.io/badge/Home%20Assistant-%2341BDF5.svg?style=flat&logo=home-assistant&label=Add%20to%20HACS)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kgn3400&repository=trafikmeldinger&category=integration)
 
 Tilføj Trafikmeldinger integrationen til Home Assistant.
@@ -19,16 +19,28 @@ Tilføj Trafikmeldinger integrationen til Home Assistant.
 
 ## Konfiguration
 
-Konfiguration opsættes via brugergrænsefladen i Home Assistant. For at tilføje en, gå til [Indstillinger > Enheder & tjenester](https://my.home-assistant.io/redirect/integrations) og tryk på [Tilføj integration knappen](https://my.home-assistant.io/redirect/integrations). Vælg derefter [Trafikmeldinger](https://my.home-assistant.io/redirect/config_flow_start?domain=trafikmeldinger) option.
+Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
 ![Config 1](/assets/config_1.png)
+
+For at kunne aktiverer rotations sensoren, skal der oprettes eller være oprettet en [Timer hjælper](https://www.home-assistant.io/integrations/timer/).
 
 ![Config 2](/assets/config_2.png)
 
 ## Markdown attribut
 
-![Markdown attribut](/assets/md_card_config.png)
+Hver sensor har en attribut som indeholder trafikmeldingen formateret som Markdown.
+
+![Markdown kort konfiguration](/assets/md_card_config.png)
+
+Tilføj et Markdown kort til visningen og indsæt ovenstående Jinja2 skabelon.
 
 ![Markdown attribut](/assets/md_card.png)
+
+Følgende attributter er tilgængelige:
+
+>{{ state_attr('sensor.trafikmeldinger_meldinger', 'trafikmelding_md') }}
+>{{ state_attr('sensor.trafikmeldinger_seneste', 'trafikmelding_md') }}
+>{{ state_attr('sensor.trafikmeldinger_vigtig_besked', 'vigtig_besked_md') }}
 
 ## Aktions
