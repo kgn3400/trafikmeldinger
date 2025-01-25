@@ -36,7 +36,9 @@ Hver sensor har en attribut som indeholder trafikmeldingen formateret som Markdo
 Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 skabeloner.
 
     {{ state_attr('sensor.trafikmeldinger_meldinger', 'trafikmelding_md') }}
+
     {{ state_attr('sensor.trafikmeldinger_seneste', 'trafikmelding_md') }}
+
     {{ state_attr('sensor.trafikmeldinger_vigtig_besked', 'vigtig_besked_md') }}
 
 ![Markdown attribut](/assets/md_card.png)
