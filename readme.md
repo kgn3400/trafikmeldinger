@@ -27,7 +27,7 @@ For at kunne aktiverer rotations sensoren, skal der oprettes eller være oprette
 
 ![Config 2](/assets/config_2.png)
 
-## Markdown attribut
+## Markdown egenskab
 
 Hver sensor har en attribut som indeholder trafikmeldingen formateret som Markdown.
 
@@ -48,3 +48,12 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 ```
 
 ## Aktions
+
+Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
+
+>Trafikmeldinger: Marker alt som læst
+>Trafikmeldinger: Marker alle trafikmeldinger som læst
+>Trafikmeldinger: Marker alle vigtige meddelelser som læst
+>Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
+>Trafikmeldinger: Marker seneste trafikmelding som læst
+>Trafikmeldinger: Rotere til næste trafikmelding
