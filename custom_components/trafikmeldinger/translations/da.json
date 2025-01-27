@@ -31,14 +31,11 @@
       },
       "user_match": {
         "title": "Trafikmeldinger",
-        "description": "Match teksten i trafikrapporterne",
+        "description": "Match teksten i trafikmeldingerne",
         "data": {
           "match_case": "Match store og små bogstaver",
           "match_word": "Match hele ordet/udtryk",
           "match_list": "Match liste"
-        },
-        "data_description": {
-          "match_list": "A very complicated option which does abc"
         }
       }
     }
@@ -55,7 +52,7 @@
         "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
-          "transport_type": "Transport type",
+          "transport_type": "Transporttype",
           "max_time_back": "Hent max timer tilabge",
           "max_row_fetch": "Hent max meldinger",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløser",
@@ -64,14 +61,11 @@
       },
       "init_match": {
         "title": "Trafikmeldinger",
-        "description": "Match teksten i trafikrapporterne",
+        "description": "Match teksten i trafikmeldingerne",
         "data": {
           "match_case": "Match store og små bogstaver",
           "match_word": "Match hele ordet/udtryk",
           "match_list": "Match liste"
-        },
-        "data_description": {
-          "match_list": "A very complicated option which does abc"
         }
       },
       "extra": {
@@ -101,7 +95,7 @@
     },
     "transport_type": {
       "options": {
-        "all": "Alle transport typer",
+        "all": "Alle transporttyper",
         "public": "kollektiv transport",
         "private": "Biltrafik"
       }

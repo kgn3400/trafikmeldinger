@@ -175,9 +175,12 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["trafikmelding_md"] = self.component_api.traffic_reports[0]["formated_md"]
+        attr["reference_text"] = self.component_api.traffic_reports[0][
+            "formated_ref_text"
+        ]
+        attr["markdown"] = self.component_api.traffic_reports[0]["formated_md"]
         attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
-        attr["transport_type"] = DICT_TRANSPORT_TYPE[
+        attr["transporttype"] = DICT_TRANSPORT_TYPE[
             self.component_api.traffic_reports[0]["type"]
         ]
         attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[0][
@@ -253,8 +256,8 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         self.component_api: ComponentApi = entry.runtime_data.component_api
 
-        self._name = "Meldinger"
-        self._unique_id = "meldinger"
+        self._name = "Roterende"
+        self._unique_id = "roterende"
 
         self.translation_key = TRANSLATION_KEY
 
@@ -333,7 +336,12 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         if self.component_api.traffic_report_rotate_pos == -1:
             return attr
-        attr["trafikmelding_md"] = self.component_api.traffic_reports[
+
+        attr["reference_text"] = self.component_api.traffic_reports[
+            self.component_api.traffic_report_rotate_pos
+        ]["formated_ref_text"]
+
+        attr["markdown"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_md"]
         attr["region"] = DICT_REGION[
@@ -341,7 +349,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
                 self.component_api.traffic_report_rotate_pos
             ]["region"]
         ]
-        attr["transport_type"] = DICT_TRANSPORT_TYPE[
+        attr["transporttype"] = DICT_TRANSPORT_TYPE[
             self.component_api.traffic_reports[
                 self.component_api.traffic_report_rotate_pos
             ]["type"]

@@ -22,7 +22,7 @@
         "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
-          "transport_type": "Transport type",
+          "transport_type": "Transporttype",
           "max_time_back": "Maximum hours back",
           "max_row_fetch": "Maximum reports to fetch",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
@@ -36,9 +36,6 @@
           "match_case": "Match case",
           "match_word": "Match the whole word",
           "match_list": "Match list"
-        },
-        "data_description": {
-          "match_list": "A very complicated option which does abc"
         }
       }
     }
@@ -55,7 +52,7 @@
         "title": "Trafikmeldinger",
         "data": {
           "region": "Region",
-          "transport_type": "Transport type",
+          "transport_type": "Transporttype",
           "max_time_back": "Maximum hours back",
           "max_row_fetch": "Maximum reports to fetch",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
@@ -69,9 +66,6 @@
           "match_case": "Match case",
           "match_word": "Match the whole word",
           "match_list": "Match list"
-        },
-        "data_description": {
-          "match_list": "A very complicated option which does abc"
         }
       },
       "extra": {
@@ -101,7 +95,7 @@
     },
     "transport_type": {
       "options": {
-        "all": "All transport types",
+        "all": "All transporttypes",
         "public": "Public transport",
         "private": "Car"
       }

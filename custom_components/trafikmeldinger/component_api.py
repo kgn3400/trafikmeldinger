@@ -75,8 +75,8 @@ class ComponentApi:
         self.max_time_back: datetime = None
 
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            self.max_time_back: datetime = dt_util.now() - timedelta(
-                hours=self.entry.options[CONF_MAX_TIME_BACK]
+            self.max_time_back: datetime = dt_util.as_local(
+                dt_util.now() - timedelta(hours=self.entry.options[CONF_MAX_TIME_BACK])
             )
 
     # ------------------------------------------------------------------
@@ -102,6 +102,15 @@ class ComponentApi:
         """Format traffic report."""
 
         return report["text"][:255]
+
+    # ------------------------------------------------------
+    async def async_traffic_report_ref_format(self, report: dict) -> str:
+        """Format traffic report reference."""
+
+        if report.get("reference") is not None:
+            return report["reference"]["text"][:255]
+
+        return ""
 
     # ------------------------------------------------------
     async def async_traffic_report_format_md(self, report: dict) -> str:
@@ -154,6 +163,9 @@ class ComponentApi:
 
         for report in self.traffic_reports:
             report["formated_text"] = await self.async_traffic_report_format(report)
+            report["formated_ref_text"] = await self.async_traffic_report_ref_format(
+                report
+            )
             report["formated_md"] = await self.async_traffic_report_format_md(report)
 
     # ------------------------------------------------------
@@ -220,7 +232,10 @@ class ComponentApi:
         if self.max_time_back is None:
             return False
 
-        if check_report["createdTime"] < self.max_time_back.isoformat():
+        if (
+            dt_util.as_local(datetime.fromisoformat(check_report["createdTime"]))
+            < self.max_time_back
+        ):
             return True
 
         return False
@@ -421,15 +436,6 @@ class ComponentApi:
     def get_next_traffic_report_pos(self) -> int:
         """Get next traffic report position."""
 
-        def check_next_report_read() -> None:
-            self.traffic_report_rotate_pos += 1
-
-            if self.traffic_report_rotate_pos > (len(self.traffic_reports) - 1):
-                self.traffic_report_rotate_pos = 0
-
-            if self.traffic_reports[self.traffic_report_rotate_pos].get("read", False):
-                check_next_report_read()
-
         if len(self.traffic_reports) == 0 or all(
             value.get("read", False) for value in self.traffic_reports
         ):
@@ -438,7 +444,13 @@ class ComponentApi:
         elif len(self.traffic_reports) == 1:
             self.traffic_report_rotate_pos = 0
         else:
-            check_next_report_read()
+            self.traffic_report_rotate_pos += 1
+
+            if self.traffic_report_rotate_pos > (len(self.traffic_reports) - 1):
+                self.traffic_report_rotate_pos = 0
+
+            if self.traffic_reports[self.traffic_report_rotate_pos].get("read", False):
+                self.get_next_traffic_report_pos()
 
         return self.traffic_report_rotate_pos
 
@@ -446,15 +458,6 @@ class ComponentApi:
     def get_prev_traffic_report_pos(self) -> int:
         """Get previous traffic report position."""
 
-        def check_prev_report_read() -> None:
-            self.traffic_report_rotate_pos -= 1
-
-            if self.traffic_report_rotate_pos < 0:
-                self.traffic_report_rotate_pos = len(self.traffic_reports) - 1
-
-            if self.traffic_reports[self.traffic_report_rotate_pos].get("read", False):
-                check_prev_report_read()
-
         if len(self.traffic_reports) == 0 or all(
             value.get("read", False) for value in self.traffic_reports
         ):
@@ -463,6 +466,12 @@ class ComponentApi:
         elif len(self.traffic_reports) == 1:
             self.traffic_report_rotate_pos = 0
         else:
-            check_prev_report_read()
+            self.traffic_report_rotate_pos -= 1
+
+            if self.traffic_report_rotate_pos < 0:
+                self.traffic_report_rotate_pos = len(self.traffic_reports) - 1
+
+            if self.traffic_reports[self.traffic_report_rotate_pos].get("read", False):
+                self.get_prev_traffic_report_pos()
 
         return self.traffic_report_rotate_pos

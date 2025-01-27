@@ -85,6 +85,7 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         """
         return self._name
 
+    # ------------------------------------------------------
     @property
     def native_value(self) -> str | None:
         """Native value.
@@ -120,7 +121,7 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["vigtig_besked_md"] = self.component_api.importan_notices[0]["formated_md"]
+        attr["markdown"] = self.component_api.importan_notices[0]["formated_md"]
         attr["oprettet_tidspunkt"] = self.component_api.importan_notices[0][
             "createdTime"
         ]
