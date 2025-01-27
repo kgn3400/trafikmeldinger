@@ -36,7 +36,7 @@ Hver sensor har en attribut som indeholder trafikmeldingen formateret som Markdo
 Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 skabeloner.
 
 ```Python
-{{ state_attr('sensor.trafikmeldinger_roternde', 'markdown') }}
+{{ state_attr('sensor.trafikmeldinger_roterende', 'markdown') }}
 ```
 
 ```Python
