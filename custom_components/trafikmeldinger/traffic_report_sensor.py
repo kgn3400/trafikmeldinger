@@ -6,7 +6,8 @@ from datetime import timedelta
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import MATCH_ALL
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import Event, HomeAssistant, ServiceCall, callback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import CommonConfigEntry
@@ -96,6 +97,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
             DOMAIN,
             "rotate_to_next_traffic_report",
         )
+        await self.component_api.storage.async_write_settings()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
@@ -104,6 +106,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
     ) -> None:
         """Mark all traffic reports as read."""
         self.component_api.mark_all_traffic_reports_as_read()
+        await self.component_api.storage.async_write_settings()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
@@ -112,6 +115,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
     ) -> None:
         """Mark latest traffic report as read."""
         self.component_api.mark_traffic_report_as_read(0)
+        await self.component_api.storage.async_write_settings()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
@@ -120,6 +124,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
     ) -> None:
         """Mark latest traffic report as read."""
         self.component_api.mark_current_traffic_report_as_read()
+        await self.component_api.storage.async_write_settings()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------
@@ -149,13 +154,13 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.traffic_reports) == 0 or (
-            len(self.component_api.traffic_reports) > 0
-            and self.component_api.traffic_reports[0]["read"]
+        if len(self.component_api.storage.traffic_reports) == 0 or (
+            len(self.component_api.storage.traffic_reports) > 0
+            and self.component_api.storage.traffic_reports[0]["read"]
         ):
             return None
 
-        return self.component_api.traffic_reports[0]["formated_text"]
+        return self.component_api.storage.traffic_reports[0]["formated_text"]
 
     # ------------------------------------------------------
     @property
@@ -169,21 +174,23 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.traffic_reports) == 0 or (
-            len(self.component_api.traffic_reports) > 0
-            and self.component_api.traffic_reports[0]["read"]
+        if len(self.component_api.storage.traffic_reports) == 0 or (
+            len(self.component_api.storage.traffic_reports) > 0
+            and self.component_api.storage.traffic_reports[0]["read"]
         ):
             return attr
 
-        attr["reference_text"] = self.component_api.traffic_reports[0][
+        attr["reference_tekst"] = self.component_api.storage.traffic_reports[0][
             "formated_ref_text"
         ]
-        attr["markdown"] = self.component_api.traffic_reports[0]["formated_md"]
-        attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
-        attr["transporttype"] = DICT_TRANSPORT_TYPE[
-            self.component_api.traffic_reports[0]["type"]
+        attr["markdown"] = self.component_api.storage.traffic_reports[0]["formated_md"]
+        attr["region"] = DICT_REGION[
+            self.component_api.storage.traffic_reports[0]["region"]
         ]
-        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[0][
+        attr["transporttype"] = DICT_TRANSPORT_TYPE[
+            self.component_api.storage.traffic_reports[0]["type"]
+        ]
+        attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[0][
             "createdTime"
         ]
 
@@ -220,10 +227,26 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
     # ------------------------------------------------------
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
+
         await self.async_refresh()
         self.async_on_remove(
             self.coordinator.async_add_listener(self.async_write_ha_state)
         )
+
+        self.hass.bus.async_listen(
+            dr.EVENT_DEVICE_REGISTRY_UPDATED,
+            self._handle_device_registry_updated,
+        )
+
+    # ------------------------------------------------------
+    @callback
+    async def _handle_device_registry_updated(
+        self, event: Event[dr.EventDeviceRegistryUpdatedData]
+    ) -> None:
+        """Handle when device registry updated."""
+
+        if event.data["action"] == "remove":
+            await self.component_api.storage.async_remove_settings()
 
 
 # ------------------------------------------------------
@@ -318,7 +341,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         if self.component_api.traffic_report_rotate_pos == -1:
             return None
 
-        return self.component_api.traffic_reports[
+        return self.component_api.storage.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_text"]
 
@@ -337,24 +360,24 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         if self.component_api.traffic_report_rotate_pos == -1:
             return attr
 
-        attr["reference_text"] = self.component_api.traffic_reports[
+        attr["reference_tekst"] = self.component_api.storage.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_ref_text"]
 
-        attr["markdown"] = self.component_api.traffic_reports[
+        attr["markdown"] = self.component_api.storage.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_md"]
         attr["region"] = DICT_REGION[
-            self.component_api.traffic_reports[
+            self.component_api.storage.traffic_reports[
                 self.component_api.traffic_report_rotate_pos
             ]["region"]
         ]
         attr["transporttype"] = DICT_TRANSPORT_TYPE[
-            self.component_api.traffic_reports[
+            self.component_api.storage.traffic_reports[
                 self.component_api.traffic_report_rotate_pos
             ]["type"]
         ]
-        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[
+        attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["createdTime"]
 

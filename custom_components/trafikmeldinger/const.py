@@ -49,3 +49,6 @@ CONF_MATCH = "match"
 CONF_MATCH_CASE = "match_case"
 CONF_MATCH_WORD = "match_word"
 CONF_MATCH_LIST = "match_list"
+
+STORAGE_VERSION = 1
+STORAGE_KEY = DOMAIN

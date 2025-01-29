@@ -37,6 +37,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
         async_get_clientsession(hass),
     )
 
+    await component_api.storage.async_read_settings()
+
     entry.async_on_unload(entry.add_update_listener(update_listener))
     entry.runtime_data = CommonData(
         component_api=component_api,

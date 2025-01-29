@@ -95,9 +95,9 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.importan_notices) == 0 or (
-            len(self.component_api.importan_notices) > 0
-            and self.component_api.importan_notices[0]["read"]
+        if len(self.component_api.storage.important_notices) == 0 or (
+            len(self.component_api.storage.important_notices) > 0
+            and self.component_api.storage.important_notices[0]["read"]
         ):
             return None
 
@@ -115,14 +115,16 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.importan_notices) == 0 or (
-            len(self.component_api.importan_notices) > 0
-            and self.component_api.importan_notices[0]["read"]
+        if len(self.component_api.storage.important_notices) == 0 or (
+            len(self.component_api.storage.important_notices) > 0
+            and self.component_api.storage.important_notices[0]["read"]
         ):
             return attr
 
-        attr["markdown"] = self.component_api.importan_notices[0]["formated_md"]
-        attr["oprettet_tidspunkt"] = self.component_api.importan_notices[0][
+        attr["markdown"] = self.component_api.storage.important_notices[0][
+            "formated_md"
+        ]
+        attr["oprettet_tidspunkt"] = self.component_api.storage.important_notices[0][
             "createdTime"
         ]
 
