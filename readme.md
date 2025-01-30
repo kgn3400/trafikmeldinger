@@ -21,17 +21,17 @@ Tilføj Trafikmeldinger integrationen til Home Assistant.
 
 Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
-![Config 1](/assets/config_1.png)
+![Config 1](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_1.png)
 
 For at kunne aktiverer rotations sensoren, skal der oprettes eller være oprettet en [Timer hjælper](https://www.home-assistant.io/integrations/timer/).
 
-![Config 2](/assets/config_2.png)
+![Config 2](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_2.png)
 
 ## Markdown egenskab
 
 Hver sensor har en attribut som indeholder trafikmeldingen formateret som Markdown.
 
-![Markdown kort konfiguration](/assets/md_card_config.png)
+![Markdown kort konfiguration](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/md_card_config.png)
 
 Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 skabeloner.
 
@@ -57,3 +57,7 @@ Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
 >Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
 >Trafikmeldinger: Marker seneste trafikmelding som læst
 >Trafikmeldinger: Rotere til næste trafikmelding
+
+## Udløser
+
+Følgende udløser er tilgængelige for Trafikmedlinger integrationen i automatiseringer:
