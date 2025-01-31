@@ -6,7 +6,7 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kgn3400/trafikmeldinger)
 [![Validate% with hassfest](https://github.com/kgn3400/trafikmeldinger/workflows/Validate%20with%20hassfest/badge.svg)](https://github.com/kgn3400/trafikmeldinger/actions/workflows/hassfest.yaml)
 
-Trafikmeldinger-integrationen giver dig mulighed for at se vigtige trafikmeldinger fra [dr.dk/trafik](https://dr.dk/trafik).
+Trafikmeldinger integrationen giver dig mulighed for at se vigtige trafikmeldinger fra [dr.dk/trafik](https://dr.dk/trafik).
 
 ## Installation
 
@@ -51,13 +51,34 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 
 Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
 
->Trafikmeldinger: Marker alt som læst
->Trafikmeldinger: Marker alle trafikmeldinger som læst
->Trafikmeldinger: Marker alle vigtige meddelelser som læst
->Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
->Trafikmeldinger: Marker seneste trafikmelding som læst
->Trafikmeldinger: Rotere til næste trafikmelding
+    Trafikmeldinger: Marker alt som læst
+    Trafikmeldinger: Marker alle trafikmeldinger som læst
+    Trafikmeldinger: Marker alle vigtige meddelelser som læst
+    Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
+    Trafikmeldinger: Marker seneste trafikmelding som læst
+    Trafikmeldinger: Rotere til næste trafikmelding
 
 ## Udløser
 
-Følgende udløser er tilgængelige for Trafikmedlinger integrationen i automatiseringer:
+Det er muligt at tilføje en udløser til en automatiseringer for Trafikmedlinger - Ny trafikmelding.
+Følgende udløser hændelses data er tilgængelige for automatiseringen:
+
+```Python
+{{ trigger.event.data.ny_trafikmelding }}
+```
+
+```Python
+{{ trigger.event.data.reference_tekst }}
+```
+
+```Python
+{{ trigger.event.data.region }}
+```
+
+```Python
+{{ trigger.event.data.transporttype }}
+```
+
+```Python
+{{ trigger.event.data.oprettet_tidspunkt }}
+```
