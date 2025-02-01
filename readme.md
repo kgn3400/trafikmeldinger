@@ -7,10 +7,11 @@
 [![Validate% with hassfest](https://github.com/kgn3400/trafikmeldinger/workflows/Validate%20with%20hassfest/badge.svg)](https://github.com/kgn3400/trafikmeldinger/actions/workflows/hassfest.yaml)
 
 Trafikmeldinger integrationen giver dig mulighed for at se vigtige trafikmeldinger fra [dr.dk/trafik](https://dr.dk/trafik).
+Der kan filtreres efter region, transporttype og at et ord/sætning der skal matche teksten i trafikmeldingen.
 
 ## Installation
 
-For installationsvejledning, indtil Trafikmeldinger-integrationen bliver en del af HACS, [se denne guide](https://hacs.xyz/docs/faq/custom_repositories).
+For installationsvejledning, indtil Trafikmeldinger integrationen bliver en del af HACS, [se denne guide](https://hacs.xyz/docs/faq/custom_repositories).
 Eller klik på
 [![My Home Assistant](https://img.shields.io/badge/Home%20Assistant-%2341BDF5.svg?style=flat&logo=home-assistant&label=Add%20to%20HACS)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kgn3400&repository=trafikmeldinger&category=integration)
 
@@ -51,16 +52,19 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 
 Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
 
-    Trafikmeldinger: Marker alt som læst
-    Trafikmeldinger: Marker alle trafikmeldinger som læst
-    Trafikmeldinger: Marker alle vigtige meddelelser som læst
-    Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
-    Trafikmeldinger: Marker seneste trafikmelding som læst
-    Trafikmeldinger: Rotere til næste trafikmelding
+```text
+Trafikmeldinger: Marker alt som læst
+Trafikmeldinger: Marker alle trafikmeldinger som læst
+Trafikmeldinger: Marker alle vigtige meddelelser som læst
+Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
+Trafikmeldinger: Marker seneste trafikmelding som læst
+Trafikmeldinger: Rotere til næste trafikmelding
+```
 
 ## Udløser
 
-Det er muligt at tilføje en udløser til en automatiseringer for Trafikmedlinger - Ny trafikmelding.
+Det er muligt at tilføje en udløser til en automatiseringer for Trafikmeldinger(Ny trafikmelding).
+
 Følgende udløser hændelses data er tilgængelige for automatiseringen:
 
 ```Python
