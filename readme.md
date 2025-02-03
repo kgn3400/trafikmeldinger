@@ -71,7 +71,7 @@ Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
 
 ## Udløser
 
-Det er muligt at tilføje en udløser til en automatiseringer for Trafikmeldinger(Ny trafikmelding).
+Det er muligt at tilføje en udløser for Trafikmeldinger(Ny trafikmelding) til automatiseringer.
 
 Følgende udløser hændelses data er tilgængelige for automatiseringen:
 
