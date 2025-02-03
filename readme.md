@@ -7,7 +7,7 @@
 [![Validate% with hassfest](https://github.com/kgn3400/trafikmeldinger/workflows/Validate%20with%20hassfest/badge.svg)](https://github.com/kgn3400/trafikmeldinger/actions/workflows/hassfest.yaml)
 
 Trafikmeldinger integrationen giver dig mulighed for at se vigtige trafikmeldinger fra [dr.dk/trafik](https://dr.dk/trafik).
-Der kan filtreres efter region, transporttype og at et ord/sætning der skal matche teksten i trafikmeldingen.
+Der kan filtreres efter region, transporttype, max timer gamle og ord/sætning der skal matche teksten i trafikmeldingen.
 
 ## Installation
 
@@ -27,6 +27,16 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 For at kunne aktiverer rotations sensoren, skal der oprettes eller være oprettet en [Timer hjælper](https://www.home-assistant.io/integrations/timer/).
 
 ![Config 2](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_2.png)
+
+## Sensors
+
+Trafikmeldinger integrationen har følgende sensors:
+
+* `sensor.trafikmeldinger_seneste`
+* `sensor.trafikmeldinger_roterende(Er kun aktiveret ved brug af en Timer hjælper)`
+* `sensor.trafikmeldinger_vigtig_besked`
+
+Bemærk at hvis filtreringen ikke giver noget resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
 
 ## Markdown egenskab
 
@@ -52,14 +62,12 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 
 Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
 
-```text
-Trafikmeldinger: Marker alt som læst
-Trafikmeldinger: Marker alle trafikmeldinger som læst
-Trafikmeldinger: Marker alle vigtige meddelelser som læst
-Trafikmeldinger: Marker aktuelle trafikmeldinger som læst
-Trafikmeldinger: Marker seneste trafikmelding som læst
-Trafikmeldinger: Rotere til næste trafikmelding
-```
+* `Trafikmeldinger: Marker alt som læst`
+* `Trafikmeldinger: Marker alle trafikmeldinger som læst`
+* `Trafikmeldinger: Marker alle vigtige meddelelser som læst`
+* `Trafikmeldinger: Marker aktuelle trafikmeldinger som læst`
+* `Trafikmeldinger: Marker seneste trafikmelding som læst`
+* `Trafikmeldinger: Rotere til næste trafikmelding`
 
 ## Udløser
 

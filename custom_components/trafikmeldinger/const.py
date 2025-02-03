@@ -52,3 +52,6 @@ CONF_MATCH_LIST = "match_list"
 
 STORAGE_VERSION = 1
 STORAGE_KEY = DOMAIN
+
+EVENT_NEW_TRAFFIC_REPORT = "new_traffic_report"
+CONF_NEW_TRAFFIC_REPORT = "new_traffic_report"

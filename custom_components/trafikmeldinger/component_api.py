@@ -25,6 +25,9 @@ from .const import (
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
     DICT_REGION,
+    DICT_TRANSPORT_TYPE,
+    DOMAIN,
+    EVENT_NEW_TRAFFIC_REPORT,
 )
 from .storage_json import StorageJson
 
@@ -40,6 +43,8 @@ class TrafficStorage(StorageJson):
         """Message log settings."""
 
         super().__init__(hass)
+
+        self.event_last_id: str = ""
 
         self.traffic_reports: list = []
         self.important_notices: list = []
@@ -186,6 +191,38 @@ class ComponentApi:
         for notice in self.storage.important_notices:
             notice["formated_text"] = await self.async_important_notice_format(notice)
             notice["formated_md"] = await self.async_important_notice_format_md(notice)
+
+    # ------------------------------------------------------
+    async def async_event_fire(self) -> bool:
+        """Event fire."""
+
+        tmp_result: bool = False
+
+        if len(self.storage.traffic_reports) == 0 and self.storage.event_last_id == "":
+            return tmp_result
+
+        if self.storage.event_last_id != self.storage.traffic_reports[0]["_id"]:
+            self.hass.bus.async_fire(
+                DOMAIN + "." + EVENT_NEW_TRAFFIC_REPORT,
+                {
+                    "ny_trafikmelding": self.storage.traffic_reports[0]["text"],
+                    "reference_tekst": self.storage.traffic_reports[0][
+                        "formated_ref_text"
+                    ],
+                    "region": DICT_REGION[self.storage.traffic_reports[0]["region"]],
+                    "transporttype": DICT_TRANSPORT_TYPE[
+                        self.storage.traffic_reports[0]["type"]
+                    ],
+                    "oprettet_tidspunkt": self.storage.traffic_reports[0][
+                        "createdTime"
+                    ],
+                },
+            )
+            tmp_result = True
+
+            self.storage.event_last_id = self.storage.traffic_reports[0]["_id"]
+
+        return tmp_result
 
     # ------------------------------------------------------
     async def async_refresh_traffic_reports(self) -> bool:

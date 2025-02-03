@@ -23,8 +23,8 @@
         "data": {
           "region": "Region",
           "transport_type": "Transporttype",
-          "max_time_back": "Maximum hours back",
-          "max_row_fetch": "Maximum reports to fetch",
+          "max_time_back": "Only fetch trafic reports that are maximum hours old",
+          "max_row_fetch": "Fetch maximum trafic reports",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
         }
@@ -53,8 +53,8 @@
         "data": {
           "region": "Region",
           "transport_type": "Transporttype",
-          "max_time_back": "Maximum hours back",
-          "max_row_fetch": "Maximum reports to fetch",
+          "max_time_back": "Only fetch trafic reports that are maximum hours old",
+          "max_row_fetch": "Fetch maximum trafic reports",
           "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
         }
@@ -133,6 +133,11 @@
     "rotate_to_next_traffic_report": {
       "description": "Rotate to next traffic report.",
       "name": "Rotate to next traffic report"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "new_traffic_report": "New traffic report"
     }
   }
 }

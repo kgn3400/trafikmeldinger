@@ -54,6 +54,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         self.component_api: ComponentApi = entry.runtime_data.component_api
 
         self.coordinator.update_interval = timedelta(minutes=2)
+        # self.coordinator.update_interval = timedelta(seconds=20)
         self.coordinator.update_method = self.async_refresh
 
         self._name = "Seneste"
@@ -132,6 +133,8 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         """Refresh."""
         if await self.component_api.async_refresh_traffic_reports():
             self.async_write_ha_state()
+
+        await self.component_api.async_event_fire()
 
     # ------------------------------------------------------
     @property
