@@ -198,7 +198,7 @@ class ComponentApi:
 
         tmp_result: bool = False
 
-        if len(self.storage.traffic_reports) == 0 and self.storage.event_last_id == "":
+        if len(self.storage.traffic_reports) == 0 or self.storage.event_last_id == "":
             return tmp_result
 
         if self.storage.event_last_id != self.storage.traffic_reports[0]["_id"]:
@@ -236,6 +236,8 @@ class ComponentApi:
             self.max_time_back: datetime = dt_util.as_local(
                 dt_util.now() - timedelta(hours=self.entry.options[CONF_MAX_TIME_BACK])
             )
+        else:
+            self.max_time_back = None
 
         tmp_result: bool = await self.async_get_new_traffic_reports()
 
@@ -433,9 +435,10 @@ class ComponentApi:
 
         # Remove reports older than max_time_back
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            for report in reversed(self.storage.traffic_reports):
+            for idx, report in reversed(list(enumerate(self.storage.traffic_reports))):
                 if await self.async_is_old_report(report):
-                    self.storage.traffic_reports.remove(report)
+                    self.storage.traffic_reports.pop(idx)
+                    # self.storage.traffic_reports.remove(report)
                     ret_result = True
 
         return ret_result
@@ -477,9 +480,12 @@ class ComponentApi:
 
         # Remove important notices older than max_time_back
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            for report in reversed(self.storage.important_notices):
+            for idx, report in reversed(
+                list(enumerate(self.storage.important_notices))
+            ):
                 if await self.async_is_old_report(report):
-                    self.storage.important_notices.remove(report)
+                    self.storage.important_notices.pop(idx)
+                    # self.storage.important_notices.remove(report)
                     ret_result = True
 
         return ret_result
