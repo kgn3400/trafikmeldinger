@@ -48,6 +48,7 @@ class TrafficStorage(StorageJson):
 
         self.traffic_reports: list = []
         self.important_notices: list = []
+        self.marked_as_read: int = 0
 
 
 # ------------------------------------------------------------------
@@ -221,6 +222,7 @@ class ComponentApi:
             tmp_result = True
 
             self.storage.event_last_id = self.storage.traffic_reports[0]["_id"]
+            await self.storage.async_write_settings()
 
         return tmp_result
 
@@ -245,6 +247,9 @@ class ComponentApi:
 
         if self.session and self.close_session:
             await self.session.close()
+
+        if await self.async_remove_to_old_traffic_reports():
+            tmp_result = True
 
         if tmp_result:
             await self.storage.async_write_settings()
@@ -305,6 +310,22 @@ class ComponentApi:
             return True
 
         return False
+
+    # ------------------------------------------------------
+    async def async_remove_to_old_traffic_reports(self) -> bool:
+        """Remove to old traffic report."""
+
+        ret_result: bool = False
+
+        # Remove reports older than max_time_back
+        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
+            for idx, report in reversed(list(enumerate(self.storage.traffic_reports))):
+                if await self.async_is_old_report(report):
+                    self.storage.traffic_reports.pop(idx)
+                    # self.storage.traffic_reports.remove(report)
+                    ret_result = True
+
+        return ret_result
 
     # ------------------------------------------------------
     async def async_get_new_traffic_reports(self, last_entry_date: str = "") -> bool:  # noqa: C901
@@ -433,14 +454,6 @@ class ComponentApi:
             if await self.async_get_new_traffic_reports(last_entry_date) is True:
                 ret_result = True
 
-        # Remove reports older than max_time_back
-        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            for idx, report in reversed(list(enumerate(self.storage.traffic_reports))):
-                if await self.async_is_old_report(report):
-                    self.storage.traffic_reports.pop(idx)
-                    # self.storage.traffic_reports.remove(report)
-                    ret_result = True
-
         return ret_result
 
     # ------------------------------------------------------
@@ -490,12 +503,29 @@ class ComponentApi:
 
         return ret_result
 
+    # ------------------------------------------------------
+    def get_read_count(self, reports: list) -> int:
+        """Get read count."""
+        x: int = len([report for report in reports if report.get("read", False)])
+        return x
+
     # ------------------------------------------------------------------
     def mark_all_traffic_reports_as_read(self) -> None:
         """Mark all traffic reports as read."""
 
         for report in self.storage.traffic_reports:
             self.mark_traffic_report_as_read(report)
+
+        self.storage.marked_as_read = len(self.storage.traffic_reports)
+
+    # ------------------------------------------------------------------
+    def unmark_all_traffic_reports_as_read(self) -> None:
+        """Unmark all traffic reports as read."""
+
+        for report in self.storage.traffic_reports:
+            self.unmark_traffic_report_as_read(report)
+
+        self.storage.marked_as_read = len(self.storage.traffic_reports)
 
     # ------------------------------------------------------------------
     def mark_traffic_report_as_read(self, report: dict | int) -> None:
@@ -507,11 +537,31 @@ class ComponentApi:
             self.storage.traffic_reports[report]["read"] = True
 
     # ------------------------------------------------------------------
+    def unmark_traffic_report_as_read(self, report: dict | int) -> None:
+        """Unmark report as read."""
+
+        if isinstance(report, dict):
+            report["read"] = False
+        elif isinstance(report, int) and report < len(self.storage.traffic_reports):
+            self.storage.traffic_reports[report]["read"] = False
+
+    # ------------------------------------------------------------------
     def mark_current_traffic_report_as_read(self) -> None:
         """Mark report as read."""
 
         if self.traffic_report_rotate_pos > -1:
             self.storage.traffic_reports[self.traffic_report_rotate_pos]["read"] = True
+
+        self.storage.marked_as_read = self.get_read_count(self.storage.traffic_reports)
+
+    # ------------------------------------------------------------------
+    def unmark_current_traffic_report_as_read(self) -> None:
+        """Unmark report as read."""
+
+        if self.traffic_report_rotate_pos > -1:
+            self.storage.traffic_reports[self.traffic_report_rotate_pos]["read"] = False
+
+        self.storage.marked_as_read = self.get_read_count(self.storage.traffic_reports)
 
     # ------------------------------------------------------------------
     def mark_all_important_notices_as_read(self) -> None:
@@ -521,6 +571,13 @@ class ComponentApi:
             self.mark_important_notice_as_read(report)
 
     # ------------------------------------------------------------------
+    def unmark_all_important_notices_as_read(self) -> None:
+        """Unmark all traffic reports as read."""
+
+        for report in self.storage.important_notices:
+            self.unmark_important_notice_as_read(report)
+
+    # ------------------------------------------------------------------
     def mark_important_notice_as_read(self, report: dict | int) -> None:
         """Mark report as read."""
 
@@ -528,6 +585,15 @@ class ComponentApi:
             report["read"] = True
         elif isinstance(report, int) and report < len(self.storage.important_notices):
             self.storage.important_notices[report]["read"] = True
+
+    # ------------------------------------------------------------------
+    def unmark_important_notice_as_read(self, report: dict | int) -> None:
+        """Unmark report as read."""
+
+        if isinstance(report, dict):
+            report["read"] = False
+        elif isinstance(report, int) and report < len(self.storage.important_notices):
+            self.storage.important_notices[report]["read"] = False
 
     # ------------------------------------------------------------------
     def get_next_traffic_report_pos(self) -> int:

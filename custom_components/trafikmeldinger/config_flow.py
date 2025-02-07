@@ -101,7 +101,7 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
         ),
         vol.Required(
             CONF_MAX_TIME_BACK,
-            default=24,
+            default=12,
         ): NumberSelector(
             NumberSelectorConfig(
                 min=0,
@@ -128,7 +128,7 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
         ),
         vol.Optional(
             CONF_RESTART_TIMER,
-            default=False,
+            default=True,
         ): BooleanSelector(),
     }
 )

@@ -59,6 +59,11 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
             "mark_all_important_notices_as_read",
             self.async_mark_all_important_notices_as_read_service,
         )
+        hass.services.async_register(
+            DOMAIN,
+            "unmark_all_important_notices_as_read",
+            self.async_unmark_all_important_notices_as_read_service,
+        )
 
     # ------------------------------------------------------------------
     async def async_mark_all_important_notices_as_read_service(
@@ -66,6 +71,14 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
     ) -> None:
         """Mark all important notices as read."""
         self.component_api.mark_all_important_notices_as_read()
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
+    async def async_unmark_all_important_notices_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Unmark all important notices as read."""
+        self.component_api.unmark_all_important_notices_as_read()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------
@@ -127,6 +140,9 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         attr["oprettet_tidspunkt"] = self.component_api.storage.important_notices[0][
             "createdTime"
         ]
+        attr["antal_vigtige_beskeder"] = len(
+            self.component_api.storage.important_notices
+        )
 
         return attr
 

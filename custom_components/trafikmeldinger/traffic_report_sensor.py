@@ -70,8 +70,18 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         )
         hass.services.async_register(
             DOMAIN,
+            "unmark_all_as_read",
+            self.async_unmark_all_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
             "mark_all_traffic_reports_as_read",
             self.async_mark_all_traffic_reports_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            "unmark_all_traffic_reports_as_read",
+            self.async_unmark_all_traffic_reports_as_read_service,
         )
         hass.services.async_register(
             DOMAIN,
@@ -80,8 +90,18 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         )
         hass.services.async_register(
             DOMAIN,
+            "unmark_latest_traffic_report_as_read",
+            self.async_unmark_latest_traffic_report_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
             "mark_current_traffic_report_as_read",
             self.async_mark_current_traffic_report_as_read_service,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            "unmark_current_traffic_report_as_read",
+            self.async_unmark_current_traffic_report_as_read_service,
         )
 
     # ------------------------------------------------------------------
@@ -102,11 +122,37 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
+    async def async_unmark_all_as_read_service(self, call: ServiceCall) -> None:
+        """Unmark all as read."""
+        await self.hass.services.async_call(
+            DOMAIN,
+            "unmark_all_important_notices_as_read",
+        )
+
+        self.component_api.unmark_all_traffic_reports_as_read()
+
+        await self.hass.services.async_call(
+            DOMAIN,
+            "rotate_to_next_traffic_report",
+        )
+        await self.component_api.storage.async_write_settings()
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
     async def async_mark_all_traffic_reports_as_read_service(
         self, call: ServiceCall
     ) -> None:
         """Mark all traffic reports as read."""
         self.component_api.mark_all_traffic_reports_as_read()
+        await self.component_api.storage.async_write_settings()
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
+    async def async_unmark_all_traffic_reports_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Unmark all traffic reports as read."""
+        self.component_api.unmark_all_traffic_reports_as_read()
         await self.component_api.storage.async_write_settings()
         await self.coordinator.async_request_refresh()
 
@@ -120,11 +166,29 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
+    async def async_unmark_latest_traffic_report_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Unmark latest traffic report as read."""
+        self.component_api.unmark_traffic_report_as_read(0)
+        await self.component_api.storage.async_write_settings()
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
     async def async_mark_current_traffic_report_as_read_service(
         self, call: ServiceCall
     ) -> None:
         """Mark latest traffic report as read."""
         self.component_api.mark_current_traffic_report_as_read()
+        await self.component_api.storage.async_write_settings()
+        await self.coordinator.async_request_refresh()
+
+    # ------------------------------------------------------------------
+    async def async_unmark_current_traffic_report_as_read_service(
+        self, call: ServiceCall
+    ) -> None:
+        """Unmark latest traffic report as read."""
+        self.component_api.unmark_current_traffic_report_as_read()
         await self.component_api.storage.async_write_settings()
         await self.coordinator.async_request_refresh()
 
@@ -196,6 +260,8 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[0][
             "createdTime"
         ]
+        attr["antal_trafikmeldinger"] = len(self.component_api.storage.traffic_reports)
+        attr["markeret_som_læst"] = self.component_api.storage.marked_as_read
 
         return attr
 
@@ -383,6 +449,9 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["createdTime"]
+
+        attr["antal_trafikmeldinger"] = len(self.component_api.storage.traffic_reports)
+        attr["markeret_som_læst"] = self.component_api.storage.marked_as_read
 
         return attr
 
