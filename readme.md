@@ -24,8 +24,6 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
 ![Config 1](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_1.png)
 
-For at kunne aktiverer rotations sensoren, skal der oprettes eller være oprettet en [Timer hjælper](https://www.home-assistant.io/integrations/timer/).
-
 ![Config 2](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_2.png)
 
 ## Sensors
@@ -33,14 +31,17 @@ For at kunne aktiverer rotations sensoren, skal der oprettes eller være oprette
 Trafikmeldinger integrationen har følgende sensors:
 
 * `sensor.trafikmeldinger_seneste`
+Sensoren viser seneste trafikmelding.
 * `sensor.trafikmeldinger_roterende(Er kun aktiveret ved brug af en Timer hjælper)`
+sensoren roterer automatisktil næste trafikmelding. Sensoren er kun aktiv/synlig hvis en [Timer hjælper](https://www.home-assistant.io/integrations/timer/) er oprettet og forbundet med Trafikmeldinger integrationen.
 * `sensor.trafikmeldinger_vigtig_besked`
+Sensoren viser seneste vigtig meddelelse for hele landet.
 
-Bemærk at hvis filtreringen ikke giver noget resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
+Bemærk at hvis filtreringen ikke giver noget umiddelbart resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
 
 ## Markdown egenskab
 
-Hver sensor har en attribut som indeholder trafikmeldingen formateret som Markdown.
+Hver sensor har en egenskab som indeholder trafikmeldingen formateret som Markdown.
 
 ![Markdown kort konfiguration](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/md_card_config.png)
 
@@ -60,7 +61,7 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 
 ## Aktions
 
-Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
+Følgende aktions er tilgængelige for Trafikmeldinger integrationen:
 
 * `Trafikmeldinger: Marker alt som læst`
 * `Trafikmeldinger: Marker alle trafikmeldinger som læst`
@@ -71,7 +72,7 @@ Følgende aktions er tilgængelige for Trafikmedlinger integrationen:
 
 ## Udløser
 
-Det er muligt at tilføje en udløser for Trafikmeldinger(Ny trafikmelding) til automatiseringer.
+Der kan tilføjes en udløser for Trafikmeldinger(Ny trafikmelding) til en automatisering.
 
 Følgende udløser hændelses data er tilgængelige for automatiseringen:
 
