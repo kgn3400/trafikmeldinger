@@ -22,9 +22,9 @@ Tilføj Trafikmeldinger integrationen til Home Assistant.
 
 Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
-![Config 1](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_1.png)
+![Config 1](https://kgn3400.github.io/trafikmeldinger/assets/config_1.png)
 
-![Config 2](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/config_2.png)
+![Config 2](https://kgn3400.github.io/trafikmeldinger/assets/config_2.png)
 
 ## Sensors
 
@@ -33,7 +33,7 @@ Trafikmeldinger integrationen har følgende sensors:
 * `sensor.trafikmeldinger_seneste`
 Sensoren viser seneste trafikmelding.
 * `sensor.trafikmeldinger_roterende(Er kun aktiveret ved brug af en Timer hjælper)`
-sensoren roterer automatisktil næste trafikmelding. Sensoren er kun aktiv/synlig hvis en [Timer hjælper](https://www.home-assistant.io/integrations/timer/) er oprettet og forbundet med Trafikmeldinger integrationen.
+Sensoren roterer automatisk til næste trafikmelding. Sensoren er kun aktiv/synlig hvis en [Timer hjælper](https://www.home-assistant.io/integrations/timer/) er oprettet og forbundet med Trafikmeldinger integrationen.
 * `sensor.trafikmeldinger_vigtig_besked`
 Sensoren viser seneste vigtig meddelelse for hele landet.
 
@@ -43,7 +43,7 @@ Bemærk at hvis filtreringen ikke giver noget umiddelbart resultat, vil sensorne
 
 Hver sensor har en egenskab som indeholder trafikmeldingen formateret som Markdown.
 
-![Markdown kort konfiguration](https://github.com/kgn3400/trafikmeldinger/blob/main/assets/md_card_config.png)
+![Markdown kort konfiguration](https://kgn3400.github.io/trafikmeldinger/assets/md_card_config.png)
 
 Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 skabeloner.
 
