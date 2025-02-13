@@ -32,12 +32,14 @@ Trafikmeldinger integrationen har følgende sensors:
 
 * `sensor.trafikmeldinger_seneste`
 Sensoren viser seneste trafikmelding.
+
 * `sensor.trafikmeldinger_roterende(Er kun aktiveret ved brug af en Timer hjælper)`
 Sensoren roterer automatisk til næste trafikmelding. Sensoren er kun aktiv/synlig hvis en [Timer hjælper](https://www.home-assistant.io/integrations/timer/) er oprettet og forbundet med Trafikmeldinger integrationen.
+
 * `sensor.trafikmeldinger_vigtig_besked`
 Sensoren viser seneste vigtig meddelelse for hele landet.
 
-Bemærk at hvis filtreringen ikke giver noget umiddelbart resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
+> **Bemærk** at hvis filtreringen ikke giver noget umiddelbart resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
 
 ## Markdown egenskab
 
@@ -70,14 +72,16 @@ Følgende aktions er tilgængelige for Trafikmeldinger integrationen:
 * `Trafikmeldinger: Marker seneste trafikmelding som læst`
 * `Trafikmeldinger: Rotere til næste trafikmelding`
 
-## Udløser
+## Udløsere
 
-Der kan tilføjes en udløser for Trafikmeldinger(Ny trafikmelding) til en automatisering.
+Der kan tilføjes en udløser for enheden Trafikmeldinger('Ny trafikmelding' og 'Ny vigtig besked') til en automatisering.
 
-Følgende udløser hændelses data er tilgængelige for automatiseringen:
+> **Bemærk** det ikke er muligt at have en automation som bruger Trafikmeldinger entiteternes tilstand som udløser. Da entiteternes egenskaber opdateres hver gang der checkes for nye opdateringner. Brug altid de indbyggede udløsere i Trafikmeldinger integrationen.
+
+Følgende udløser hændelses data er tilgængelige for automatiseringen for 'Ny trafikmelding':
 
 ```Python
-{{ trigger.event.data.ny_trafikmelding }}
+{{ trigger.event.data.ny_melding }}
 ```
 
 ```Python
@@ -94,4 +98,57 @@ Følgende udløser hændelses data er tilgængelige for automatiseringen:
 
 ```Python
 {{ trigger.event.data.oprettet_tidspunkt }}
+```
+
+Følgende udløser hændelses data er tilgængelige for automatiseringen for 'Ny vigtig besked':
+
+```Python
+{{ trigger.event.data.ny_melding }}
+```
+
+```Python
+{{ trigger.event.data.oprettet_tidspunkt }}
+```
+
+Eksempel på automatisering:
+
+```yaml
+alias: Trafikmelding notifikation
+description: ""
+triggers:
+  - device_id: e0d8b8b0f892d9ed1d603384dd1e7aee
+    domain: trafikmeldinger
+    type: new_traffic_report
+    trigger: device
+    id: Ny trafikmelding
+  - device_id: e0d8b8b0f892d9ed1d603384dd1e7aee
+    domain: trafikmeldinger
+    type: new_important_notice
+    trigger: device
+    id: Ny vigtig besked
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Ny trafikmelding
+        sequence:
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: |-
+                {{ trigger.event.data.ny_melding }}
+
+                Reference: {{trigger.event.data.reference_tekst}}
+      - conditions:
+          - condition: trigger
+            id:
+              - Ny vigtig besked
+        sequence:
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: "{{ trigger.event.data.ny_melding }} "
+mode: single
 ```

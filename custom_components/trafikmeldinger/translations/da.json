@@ -25,6 +25,7 @@
           "transport_type": "Transporttype",
           "max_time_back": "Hent kun trafikmeldinger som er max timer gamle",
           "max_row_fetch": "Hent max antal trafikmeldinger",
+          "remove_references": "Skjul trafikmeldinger der er reference til",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløserr",
           "restart_timer": "Genstart Timer hjælper automatisk"
         }
@@ -55,6 +56,7 @@
           "transport_type": "Transporttype",
           "max_time_back": "Hent kun trafikmeldinger som er max timer gamle",
           "max_row_fetch": "Hent max antal trafikmeldinger",
+          "remove_references": "Skjul trafikmeldinger der er reference til",
           "listen_to_timer_trigger": "Brug Timer hjælper som rotationsudløser",
           "restart_timer": "Genstart Timer hjælper automatisk"
         }
@@ -165,7 +167,8 @@
   },
   "device_automation": {
     "trigger_type": {
-      "new_traffic_report": "Ny trafikmelding"
+      "new_traffic_report": "Ny trafikmelding",
+      "new_important_notice": "Ny vigtig besked"
     }
   }
 }

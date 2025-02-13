@@ -37,7 +37,7 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
                 hass,
                 LOGGER,
                 name=DOMAIN,
-                update_interval=timedelta(minutes=1),
+                update_interval=timedelta(minutes=4),
                 update_method=self.async_refresh,
             ),
             entry,
@@ -84,8 +84,11 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
     # ------------------------------------------------------
     async def async_refresh(self) -> None:
         """Refresh."""
-        if await self.component_api.async_refresh_important_notices():
-            self.async_write_ha_state()
+        await self.component_api.async_refresh_important_notices()
+
+        await self.component_api.async_important_notice_event_fire()
+
+        self.async_write_ha_state()
 
     # ------------------------------------------------------
     @property
@@ -114,7 +117,7 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         ):
             return None
 
-        return self.component_api.importan_notices[0]["formated_text"]
+        return self.component_api.storage.important_notices[0]["formated_text"]
 
     # ------------------------------------------------------
     @property

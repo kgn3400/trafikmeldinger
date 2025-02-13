@@ -41,7 +41,7 @@ DICT_TRANSPORT_TYPE = {
 
 CONF_MAX_TIME_BACK = "max_time_back"
 CONF_MAX_ROW_FETCH = "max_row_fetch"
-
+CONF_REMOVE_REFERENCES = "remove_references"
 CONF_RESTART_TIMER = "restart_timer"
 CONF_LISTEN_TO_TIMER_TRIGGER = "listen_to_timer_trigger"
 
@@ -54,4 +54,4 @@ STORAGE_VERSION = 1
 STORAGE_KEY = DOMAIN
 
 EVENT_NEW_TRAFFIC_REPORT = "new_traffic_report"
-CONF_NEW_TRAFFIC_REPORT = "new_traffic_report"
+EVENT_NEW_IMPORTANT_NOTICE = "new_important_notice"

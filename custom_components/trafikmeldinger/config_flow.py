@@ -40,6 +40,7 @@ from .const import (
     CONF_REGION_CPH,
     CONF_REGION_MID_NORTH,
     CONF_REGION_SOUTH,
+    CONF_REMOVE_REFERENCES,
     CONF_RESTART_TIMER,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
@@ -121,6 +122,10 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
                 unit_of_measurement="rækker",
             )
         ),
+        vol.Optional(
+            CONF_REMOVE_REFERENCES,
+            default=True,
+        ): BooleanSelector(),
         vol.Optional(
             CONF_LISTEN_TO_TIMER_TRIGGER,
         ): EntitySelector(

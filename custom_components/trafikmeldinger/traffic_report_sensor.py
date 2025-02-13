@@ -44,11 +44,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         self.entry: CommonConfigEntry = entry
 
         super().__init__(
-            DataUpdateCoordinator(
-                hass,
-                LOGGER,
-                name=DOMAIN,
-            ),
+            DataUpdateCoordinator(hass, LOGGER, name=DOMAIN, always_update=False),
             entry,
         )
         self.component_api: ComponentApi = entry.runtime_data.component_api
@@ -195,10 +191,11 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
     # ------------------------------------------------------
     async def async_refresh(self) -> None:
         """Refresh."""
-        if await self.component_api.async_refresh_traffic_reports():
-            self.async_write_ha_state()
+        await self.component_api.async_refresh_traffic_reports()
 
-        await self.component_api.async_event_fire()
+        await self.component_api.async_traffic_report_event_fire()
+
+        self.async_write_ha_state()
 
     # ------------------------------------------------------
     @property
@@ -407,7 +404,10 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if self.component_api.traffic_report_rotate_pos == -1:
+        if (
+            self.component_api.traffic_report_rotate_pos == -1
+            or len(self.component_api.storage.traffic_reports) == 0
+        ):
             return None
 
         return self.component_api.storage.traffic_reports[
@@ -426,7 +426,10 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if self.component_api.traffic_report_rotate_pos == -1:
+        if (
+            self.component_api.traffic_report_rotate_pos == -1
+            or len(self.component_api.storage.traffic_reports) == 0
+        ):
             return attr
 
         attr["reference_tekst"] = self.component_api.storage.traffic_reports[

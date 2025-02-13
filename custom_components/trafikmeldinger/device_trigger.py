@@ -13,9 +13,10 @@ from homeassistant.core import CALLBACK_TYPE, HomeAssistant
 from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
 from homeassistant.helpers.typing import ConfigType
 
-from .const import DOMAIN, EVENT_NEW_TRAFFIC_REPORT
+from .const import DOMAIN, EVENT_NEW_IMPORTANT_NOTICE, EVENT_NEW_TRAFFIC_REPORT
 
-TRIGGER_TYPES = {EVENT_NEW_TRAFFIC_REPORT}
+# TRIGGER_TYPES = {EVENT_NEW_TRAFFIC_REPORT}
+TRIGGER_TYPES = {EVENT_NEW_TRAFFIC_REPORT, EVENT_NEW_IMPORTANT_NOTICE}
 
 TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
     {
@@ -38,6 +39,7 @@ async def async_get_triggers(
         # Required fields of TRIGGER_SCHEMA
     }
     triggers.append({**base_trigger, CONF_TYPE: EVENT_NEW_TRAFFIC_REPORT})
+    triggers.append({**base_trigger, CONF_TYPE: EVENT_NEW_IMPORTANT_NOTICE})
 
     return triggers
 
@@ -53,7 +55,7 @@ async def async_attach_trigger(
     event_config = event_trigger.TRIGGER_SCHEMA(
         {
             event_trigger.CONF_PLATFORM: "event",
-            event_trigger.CONF_EVENT_TYPE: DOMAIN + "." + EVENT_NEW_TRAFFIC_REPORT,
+            event_trigger.CONF_EVENT_TYPE: config["domain"] + "." + config[CONF_TYPE],
         }
     )
 

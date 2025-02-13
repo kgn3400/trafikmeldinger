@@ -21,12 +21,14 @@ from .const import (
     CONF_MAX_TIME_BACK,
     CONF_REGION,
     CONF_REGION_ALL,
+    CONF_REMOVE_REFERENCES,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
     DICT_REGION,
     DICT_TRANSPORT_TYPE,
     DOMAIN,
+    EVENT_NEW_IMPORTANT_NOTICE,
     EVENT_NEW_TRAFFIC_REPORT,
 )
 from .storage_json import StorageJson
@@ -44,7 +46,8 @@ class TrafficStorage(StorageJson):
 
         super().__init__(hass)
 
-        self.event_last_id: str = ""
+        self.traffic_report_last_id: str = ""
+        self.important_notice_last_id: str = ""
 
         self.traffic_reports: list = []
         self.important_notices: list = []
@@ -194,19 +197,60 @@ class ComponentApi:
             notice["formated_md"] = await self.async_important_notice_format_md(notice)
 
     # ------------------------------------------------------
-    async def async_event_fire(self) -> bool:
-        """Event fire."""
+    async def async_update_traffic_report_last_event_id(self) -> None:
+        """Update traffic report last event id."""
 
-        tmp_result: bool = False
+        if self.storage.traffic_report_last_id == "":
+            return
+        if len(self.storage.traffic_reports) == 0:
+            self.storage.traffic_report_last_id = ""
+            await self.storage.async_write_settings()
+        elif (
+            self.storage.traffic_report_last_id
+            != self.storage.traffic_reports[0]["_id"]
+        ):
+            self.storage.traffic_report_last_id = self.storage.traffic_reports[0]["_id"]
 
-        if len(self.storage.traffic_reports) == 0 or self.storage.event_last_id == "":
-            return tmp_result
+            await self.storage.async_write_settings()
 
-        if self.storage.event_last_id != self.storage.traffic_reports[0]["_id"]:
+    # ------------------------------------------------------
+    async def async_update_important_notice_last_event_id(self) -> None:
+        """Update important notice last event id."""
+
+        if self.storage.important_notice_last_id == "":
+            return
+
+        if len(self.storage.important_notices) == 0:
+            self.storage.important_notice_last_id = ""
+            await self.storage.async_write_settings()
+        elif (
+            self.storage.important_notice_last_id
+            != self.storage.important_notices[0]["_id"]
+        ):
+            self.storage.important_notice_last_id = self.storage.important_notices[0][
+                "_id"
+            ]
+
+            await self.storage.async_write_settings()
+
+    # ------------------------------------------------------
+    async def async_traffic_report_event_fire(self) -> None:
+        """Traffic report event fire."""
+
+        if (
+            len(self.storage.traffic_reports) == 0
+            or self.storage.traffic_report_last_id == ""
+        ):
+            return
+
+        if (
+            self.storage.traffic_report_last_id
+            != self.storage.traffic_reports[0]["_id"]
+        ):
             self.hass.bus.async_fire(
                 DOMAIN + "." + EVENT_NEW_TRAFFIC_REPORT,
                 {
-                    "ny_trafikmelding": self.storage.traffic_reports[0]["text"],
+                    "ny_melding": self.storage.traffic_reports[0]["text"],
                     "reference_tekst": self.storage.traffic_reports[0][
                         "formated_ref_text"
                     ],
@@ -219,12 +263,32 @@ class ComponentApi:
                     ],
                 },
             )
-            tmp_result = True
+        await self.async_update_traffic_report_last_event_id()
 
-            self.storage.event_last_id = self.storage.traffic_reports[0]["_id"]
-            await self.storage.async_write_settings()
+    # ------------------------------------------------------
+    async def async_important_notice_event_fire(self) -> None:
+        """Fire important notice event."""
 
-        return tmp_result
+        if (
+            len(self.storage.important_notices) == 0
+            or self.storage.important_notice_last_id == ""
+        ):
+            return
+
+        if (
+            self.storage.important_notice_last_id
+            != self.storage.important_notices[0]["_id"]
+        ):
+            self.hass.bus.async_fire(
+                DOMAIN + "." + EVENT_NEW_IMPORTANT_NOTICE,
+                {
+                    "ny_melding": self.storage.traffic_reports[0]["text"],
+                    "oprettet_tidspunkt": self.storage.traffic_reports[0][
+                        "createdTime"
+                    ],
+                },
+            )
+        await self.async_update_important_notice_last_event_id()
 
     # ------------------------------------------------------
     async def async_refresh_traffic_reports(self) -> bool:
@@ -254,7 +318,18 @@ class ComponentApi:
         if tmp_result:
             await self.storage.async_write_settings()
 
-        return tmp_result
+        # Anything changed?
+        if (
+            len(self.storage.traffic_reports) == 0
+            and self.storage.traffic_report_last_id != ""
+        ) or (
+            len(self.storage.traffic_reports) > 0
+            and self.storage.traffic_report_last_id
+            != self.storage.traffic_reports[0]["_id"]
+        ):
+            return True
+
+        return False
 
     # ------------------------------------------------------
     async def async_refresh_important_notices(self) -> bool:
@@ -331,7 +406,7 @@ class ComponentApi:
     async def async_get_new_traffic_reports(self, last_entry_date: str = "") -> bool:  # noqa: C901
         """Get new traffic report."""
 
-        remove_references: bool = True
+        remove_references: bool = self.entry.options.get(CONF_REMOVE_REFERENCES, True)
         done: bool = False
         ret_result: bool = False
 
@@ -499,7 +574,7 @@ class ComponentApi:
                 if await self.async_is_old_report(report):
                     self.storage.important_notices.pop(idx)
                     # self.storage.important_notices.remove(report)
-                    ret_result = True
+                    # ret_result = True
 
         return ret_result
 
