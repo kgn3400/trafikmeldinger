@@ -72,9 +72,9 @@ Følgende aktions er tilgængelige for Trafikmeldinger integrationen:
 * `Trafikmeldinger: Marker seneste trafikmelding som læst`
 * `Trafikmeldinger: Rotere til næste trafikmelding`
 
-## Udløsere
+## Automations udløsere
 
-Der kan tilføjes en udløser for enheden Trafikmeldinger('Ny trafikmelding' og 'Ny vigtig besked') til en automatisering.
+Der kan tilføjes en udløser for enheden Trafikmeldinger('Ny trafikmelding' og 'Ny vigtig besked') til en automatisering, som vil blive udløst når der er nye meldinger.
 
 > **Bemærk** det ikke er muligt at have en automation som bruger Trafikmeldinger entiteternes tilstand som udløser. Da entiteternes egenskaber opdateres hver gang der checkes for nye opdateringner. Brug altid de indbyggede udløsere i Trafikmeldinger integrationen.
 
