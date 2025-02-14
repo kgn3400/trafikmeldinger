@@ -154,3 +154,5 @@ actions:
               message: "{{ trigger.event.data.ny_melding }} "
 mode: single
 ```
+
+Giv gerne denne integration en stjerne på GitHub, hvis du synes om integration.
