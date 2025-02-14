@@ -140,7 +140,9 @@ actions:
               message: |-
                 {{ trigger.event.data.ny_melding }}
 
+                {% if trigger.event.data.reference_tekst != '' %}
                 Reference: {{trigger.event.data.reference_tekst}}
+                {% endif %}
       - conditions:
           - condition: trigger
             id:
