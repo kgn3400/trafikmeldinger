@@ -257,6 +257,9 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[0][
             "createdTime"
         ]
+        attr["opdateret_tidspunkt"] = self.component_api.storage.traffic_reports[0][
+            "updatedTime"
+        ]
         attr["antal_trafikmeldinger"] = len(self.component_api.storage.traffic_reports)
         attr["markeret_som_læst"] = self.component_api.storage.marked_as_read
 
@@ -452,6 +455,9 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["createdTime"]
+        attr["opdateret_tidspunkt"] = self.component_api.storage.traffic_reports[
+            self.component_api.traffic_report_rotate_pos
+        ]["updatedTime"]
 
         attr["antal_trafikmeldinger"] = len(self.component_api.storage.traffic_reports)
         attr["markeret_som_læst"] = self.component_api.storage.marked_as_read

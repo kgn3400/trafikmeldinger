@@ -143,6 +143,9 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         attr["oprettet_tidspunkt"] = self.component_api.storage.important_notices[0][
             "createdTime"
         ]
+        attr["opdateret_tidspunkt"] = self.component_api.storage.important_notices[0][
+            "updatedTime"
+        ]
         attr["antal_vigtige_beskeder"] = len(
             self.component_api.storage.important_notices
         )

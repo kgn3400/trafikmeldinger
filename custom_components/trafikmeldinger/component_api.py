@@ -203,11 +203,16 @@ class ComponentApi:
         if len(self.storage.traffic_reports) == 0:
             self.storage.traffic_report_last_id = ""
             await self.storage.async_write_settings()
-        elif (
-            self.storage.traffic_report_last_id
-            != self.storage.traffic_reports[0]["_id"]
+        elif self.storage.traffic_report_last_id != (
+            self.storage.traffic_reports[0]["_id"]
+            + " "
+            + self.storage.traffic_reports[0]["updatedTime"]
         ):
-            self.storage.traffic_report_last_id = self.storage.traffic_reports[0]["_id"]
+            self.storage.traffic_report_last_id = (
+                self.storage.traffic_reports[0]["_id"]
+                + " "
+                + self.storage.traffic_reports[0]["updatedTime"]
+            )
 
             await self.storage.async_write_settings()
 
@@ -218,13 +223,16 @@ class ComponentApi:
         if len(self.storage.important_notices) == 0:
             self.storage.important_notice_last_id = ""
             await self.storage.async_write_settings()
-        elif (
-            self.storage.important_notice_last_id
-            != self.storage.important_notices[0]["_id"]
+        elif self.storage.important_notice_last_id != (
+            self.storage.important_notices[0]["_id"]
+            + " "
+            + self.storage.important_notices[0]["updatedTime"]
         ):
-            self.storage.important_notice_last_id = self.storage.important_notices[0][
-                "_id"
-            ]
+            self.storage.important_notice_last_id = (
+                self.storage.important_notices[0]["_id"]
+                + " "
+                + self.storage.important_notices[0]["updatedTime"]
+            )
 
             await self.storage.async_write_settings()
 
@@ -235,9 +243,10 @@ class ComponentApi:
         if len(self.storage.traffic_reports) == 0:
             return
 
-        if (
-            self.storage.traffic_report_last_id
-            != self.storage.traffic_reports[0]["_id"]
+        if self.storage.traffic_report_last_id != (
+            self.storage.traffic_reports[0]["_id"]
+            + " "
+            + self.storage.traffic_reports[0]["updatedTime"]
         ):
             self.hass.bus.async_fire(
                 DOMAIN + "." + EVENT_NEW_TRAFFIC_REPORT,
@@ -253,6 +262,9 @@ class ComponentApi:
                     "oprettet_tidspunkt": self.storage.traffic_reports[0][
                         "createdTime"
                     ],
+                    "opdateret_tidspunkt": self.storage.traffic_reports[0][
+                        "updatedTime"
+                    ],
                 },
             )
         await self.async_update_traffic_report_last_event_id()
@@ -264,9 +276,10 @@ class ComponentApi:
         if len(self.storage.important_notices) == 0:
             return
 
-        if (
-            self.storage.important_notice_last_id
-            != self.storage.important_notices[0]["_id"]
+        if self.storage.important_notice_last_id != (
+            self.storage.important_notices[0]["_id"]
+            + " "
+            + self.storage.important_notices[0]["updatedTime"]
         ):
             self.hass.bus.async_fire(
                 DOMAIN + "." + EVENT_NEW_IMPORTANT_NOTICE,
@@ -274,6 +287,9 @@ class ComponentApi:
                     "ny_melding": self.storage.important_notices[0]["text"],
                     "oprettet_tidspunkt": self.storage.important_notices[0][
                         "createdTime"
+                    ],
+                    "opdateret_tidspunkt": self.storage.important_notices[0][
+                        "updatedTime"
                     ],
                 },
             )
@@ -541,7 +557,9 @@ class ComponentApi:
                     id_found: bool = False
 
                     for report in self.storage.important_notices:
-                        if report["_id"] == tmp_notice["_id"]:
+                        if (report["_id"] + report["updatedTime"]) == (
+                            tmp_notice["_id"] + tmp_notice["updatedTime"]
+                        ):
                             id_found = True
                             break
 
