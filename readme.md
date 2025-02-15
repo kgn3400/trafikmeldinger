@@ -155,4 +155,4 @@ actions:
 mode: single
 ```
 
-Giv gerne denne integration en stjerne på GitHub, hvis du synes om integration.
+Giv gerne denne integration en stjerne på GitHub, hvis du synes om integration 👍

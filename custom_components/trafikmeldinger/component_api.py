@@ -200,8 +200,6 @@ class ComponentApi:
     async def async_update_traffic_report_last_event_id(self) -> None:
         """Update traffic report last event id."""
 
-        if self.storage.traffic_report_last_id == "":
-            return
         if len(self.storage.traffic_reports) == 0:
             self.storage.traffic_report_last_id = ""
             await self.storage.async_write_settings()
@@ -216,9 +214,6 @@ class ComponentApi:
     # ------------------------------------------------------
     async def async_update_important_notice_last_event_id(self) -> None:
         """Update important notice last event id."""
-
-        if self.storage.important_notice_last_id == "":
-            return
 
         if len(self.storage.important_notices) == 0:
             self.storage.important_notice_last_id = ""
@@ -237,10 +232,7 @@ class ComponentApi:
     async def async_traffic_report_event_fire(self) -> None:
         """Traffic report event fire."""
 
-        if (
-            len(self.storage.traffic_reports) == 0
-            or self.storage.traffic_report_last_id == ""
-        ):
+        if len(self.storage.traffic_reports) == 0:
             return
 
         if (
@@ -269,10 +261,7 @@ class ComponentApi:
     async def async_important_notice_event_fire(self) -> None:
         """Fire important notice event."""
 
-        if (
-            len(self.storage.important_notices) == 0
-            or self.storage.important_notice_last_id == ""
-        ):
+        if len(self.storage.important_notices) == 0:
             return
 
         if (
@@ -282,8 +271,8 @@ class ComponentApi:
             self.hass.bus.async_fire(
                 DOMAIN + "." + EVENT_NEW_IMPORTANT_NOTICE,
                 {
-                    "ny_melding": self.storage.traffic_reports[0]["text"],
-                    "oprettet_tidspunkt": self.storage.traffic_reports[0][
+                    "ny_melding": self.storage.important_notices[0]["text"],
+                    "oprettet_tidspunkt": self.storage.important_notices[0][
                         "createdTime"
                     ],
                 },
