@@ -218,13 +218,13 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.storage.traffic_reports) == 0 or (
-            len(self.component_api.storage.traffic_reports) > 0
-            and self.component_api.storage.traffic_reports[0]["read"]
+        if len(self.component_api.traffic_reports) == 0 or (
+            len(self.component_api.traffic_reports) > 0
+            and self.component_api.traffic_reports[0]["read"]
         ):
             return None
 
-        return self.component_api.storage.traffic_reports[0]["formated_text"]
+        return self.component_api.traffic_reports[0]["formated_text"]
 
     # ------------------------------------------------------
     @property
@@ -238,29 +238,27 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.storage.traffic_reports) == 0 or (
-            len(self.component_api.storage.traffic_reports) > 0
-            and self.component_api.storage.traffic_reports[0]["read"]
+        if len(self.component_api.traffic_reports) == 0 or (
+            len(self.component_api.traffic_reports) > 0
+            and self.component_api.traffic_reports[0]["read"]
         ):
             return attr
 
-        attr["reference_tekst"] = self.component_api.storage.traffic_reports[0][
+        attr["reference_tekst"] = self.component_api.traffic_reports[0][
             "formated_ref_text"
         ]
-        attr["markdown"] = self.component_api.storage.traffic_reports[0]["formated_md"]
-        attr["region"] = DICT_REGION[
-            self.component_api.storage.traffic_reports[0]["region"]
-        ]
+        attr["markdown"] = self.component_api.traffic_reports[0]["formated_md"]
+        attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
         attr["transporttype"] = DICT_TRANSPORT_TYPE[
-            self.component_api.storage.traffic_reports[0]["type"]
+            self.component_api.traffic_reports[0]["type"]
         ]
-        attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[0][
+        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[0][
             "createdTime"
         ]
-        attr["opdateret_tidspunkt"] = self.component_api.storage.traffic_reports[0][
+        attr["opdateret_tidspunkt"] = self.component_api.traffic_reports[0][
             "updatedTime"
         ]
-        attr["antal_trafikmeldinger"] = len(self.component_api.storage.traffic_reports)
+        attr["antal_trafikmeldinger"] = len(self.component_api.traffic_reports)
         attr["markeret_som_læst"] = self.component_api.storage.marked_as_read
 
         return attr
@@ -409,11 +407,11 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         if (
             self.component_api.traffic_report_rotate_pos == -1
-            or len(self.component_api.storage.traffic_reports) == 0
+            or len(self.component_api.traffic_reports) == 0
         ):
             return None
 
-        return self.component_api.storage.traffic_reports[
+        return self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_text"]
 
@@ -431,35 +429,35 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         if (
             self.component_api.traffic_report_rotate_pos == -1
-            or len(self.component_api.storage.traffic_reports) == 0
+            or len(self.component_api.traffic_reports) == 0
         ):
             return attr
 
-        attr["reference_tekst"] = self.component_api.storage.traffic_reports[
+        attr["reference_tekst"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_ref_text"]
 
-        attr["markdown"] = self.component_api.storage.traffic_reports[
+        attr["markdown"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["formated_md"]
         attr["region"] = DICT_REGION[
-            self.component_api.storage.traffic_reports[
+            self.component_api.traffic_reports[
                 self.component_api.traffic_report_rotate_pos
             ]["region"]
         ]
         attr["transporttype"] = DICT_TRANSPORT_TYPE[
-            self.component_api.storage.traffic_reports[
+            self.component_api.traffic_reports[
                 self.component_api.traffic_report_rotate_pos
             ]["type"]
         ]
-        attr["oprettet_tidspunkt"] = self.component_api.storage.traffic_reports[
+        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["createdTime"]
-        attr["opdateret_tidspunkt"] = self.component_api.storage.traffic_reports[
+        attr["opdateret_tidspunkt"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
         ]["updatedTime"]
 
-        attr["antal_trafikmeldinger"] = len(self.component_api.storage.traffic_reports)
+        attr["antal_trafikmeldinger"] = len(self.component_api.traffic_reports)
         attr["markeret_som_læst"] = self.component_api.storage.marked_as_read
 
         return attr

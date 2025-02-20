@@ -111,13 +111,13 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if len(self.component_api.storage.important_notices) == 0 or (
-            len(self.component_api.storage.important_notices) > 0
-            and self.component_api.storage.important_notices[0]["read"]
+        if len(self.component_api.important_notices) == 0 or (
+            len(self.component_api.important_notices) > 0
+            and self.component_api.important_notices[0]["read"]
         ):
             return None
 
-        return self.component_api.storage.important_notices[0]["formated_text"]
+        return self.component_api.important_notices[0]["formated_text"]
 
     # ------------------------------------------------------
     @property
@@ -131,24 +131,20 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.storage.important_notices) == 0 or (
-            len(self.component_api.storage.important_notices) > 0
-            and self.component_api.storage.important_notices[0]["read"]
+        if len(self.component_api.important_notices) == 0 or (
+            len(self.component_api.important_notices) > 0
+            and self.component_api.important_notices[0]["read"]
         ):
             return attr
 
-        attr["markdown"] = self.component_api.storage.important_notices[0][
-            "formated_md"
-        ]
-        attr["oprettet_tidspunkt"] = self.component_api.storage.important_notices[0][
+        attr["markdown"] = self.component_api.important_notices[0]["formated_md"]
+        attr["oprettet_tidspunkt"] = self.component_api.important_notices[0][
             "createdTime"
         ]
-        attr["opdateret_tidspunkt"] = self.component_api.storage.important_notices[0][
+        attr["opdateret_tidspunkt"] = self.component_api.important_notices[0][
             "updatedTime"
         ]
-        attr["antal_vigtige_beskeder"] = len(
-            self.component_api.storage.important_notices
-        )
+        attr["antal_vigtige_beskeder"] = len(self.component_api.important_notices)
 
         return attr
 
