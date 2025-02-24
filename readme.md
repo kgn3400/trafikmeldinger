@@ -116,12 +116,12 @@ Eksempel på automatisering:
 alias: Trafikmelding notifikation
 description: ""
 triggers:
-  - device_id: e0d8b8b0f892d9ed1d603384dd1e7aee
+  - device_id: <Indsæt device_id for Trafikmeldinger integrationen her>
     domain: trafikmeldinger
     type: new_traffic_report
     trigger: device
     id: Ny trafikmelding
-  - device_id: e0d8b8b0f892d9ed1d603384dd1e7aee
+  - device_id: <Indsæt device_id for Trafikmeldinger integrationen her>
     domain: trafikmeldinger
     type: new_important_notice
     trigger: device
