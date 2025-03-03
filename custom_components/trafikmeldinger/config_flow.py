@@ -7,8 +7,6 @@ from typing import Any, cast
 
 import voluptuous as vol
 
-# from homeassistant.data_entry_flow import section
-#  from homeassistant import config_entries
 from homeassistant.helpers.schema_config_entry_flow import (
     SchemaCommonFlowHandler,
     SchemaConfigFlowHandler,
@@ -28,6 +26,8 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
 )
 
+# from homeassistant.data_entry_flow import section
+#  from homeassistant import config_entries
 from .const import (
     CONF_LISTEN_TO_TIMER_TRIGGER,
     CONF_MATCH_CASE,
@@ -35,13 +35,14 @@ from .const import (
     CONF_MATCH_WORD,
     CONF_MAX_ROW_FETCH,
     CONF_MAX_TIME_BACK,
+    CONF_ONLY_SHOW_LAST_UPDATE,
     CONF_REGION,
     CONF_REGION_ALL,
     CONF_REGION_CPH,
     CONF_REGION_MID_NORTH,
     CONF_REGION_SOUTH,
-    CONF_REMOVE_REFERENCES,
     CONF_RESTART_TIMER,
+    CONF_ROTATE_EVERY_MINUTES,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -123,9 +124,21 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
             )
         ),
         vol.Optional(
-            CONF_REMOVE_REFERENCES,
+            CONF_ONLY_SHOW_LAST_UPDATE,
             default=True,
         ): BooleanSelector(),
+        vol.Required(
+            CONF_ROTATE_EVERY_MINUTES,
+            default=0.50,
+        ): NumberSelector(
+            NumberSelectorConfig(
+                min=0.25,
+                max=999,
+                step="any",
+                mode=NumberSelectorMode.BOX,
+                unit_of_measurement="minuter",
+            )
+        ),
         vol.Optional(
             CONF_LISTEN_TO_TIMER_TRIGGER,
         ): EntitySelector(

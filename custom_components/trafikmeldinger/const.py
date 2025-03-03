@@ -41,9 +41,10 @@ DICT_TRANSPORT_TYPE = {
 
 CONF_MAX_TIME_BACK = "max_time_back"
 CONF_MAX_ROW_FETCH = "max_row_fetch"
-CONF_REMOVE_REFERENCES = "remove_references"
+CONF_ONLY_SHOW_LAST_UPDATE = "only_show_last_update"
 CONF_RESTART_TIMER = "restart_timer"
 CONF_LISTEN_TO_TIMER_TRIGGER = "listen_to_timer_trigger"
+CONF_ROTATE_EVERY_MINUTES = "rotate_every_minutes"
 
 CONF_MATCH = "match"
 CONF_MATCH_CASE = "match_case"

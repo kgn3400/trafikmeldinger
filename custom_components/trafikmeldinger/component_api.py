@@ -19,9 +19,9 @@ from .const import (
     CONF_MATCH_WORD,
     CONF_MAX_ROW_FETCH,
     CONF_MAX_TIME_BACK,
+    CONF_ONLY_SHOW_LAST_UPDATE,
     CONF_REGION,
     CONF_REGION_ALL,
-    CONF_REMOVE_REFERENCES,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -46,7 +46,7 @@ class TrafficStorage(StorageJson):
 
         super().__init__(hass)
 
-        self.traffic_report_last_id: str = ""
+        self.traffic_reports_last_id: dict[str, str] = {}
         self.important_notice_last_id: str = ""
 
         self.marked_as_read: int = 0
@@ -120,19 +120,20 @@ class ComponentApi:
         return diff_str
 
     # ------------------------------------------------------
-    async def async_traffic_report_format(self, report: dict) -> str:
+    def traffic_report_format(self, report: dict) -> str:
         """Format traffic report."""
 
         return report["text"][:255]
 
     # ------------------------------------------------------
-    async def async_traffic_report_ref_format(self, report: dict) -> str:
-        """Format traffic report reference."""
+    def traffic_report_updates_format(self, report: dict) -> list:
+        """Format traffic report updates."""
 
-        if report.get("reference") is not None:
-            return report["reference"]["text"][:255]
+        if report.get("updates") is not None:
+            tmp_list: list = [x["text"] for x in report["updates"]]
+            return tmp_list
 
-        return ""
+        return {}
 
     # ------------------------------------------------------
     async def async_traffic_report_format_md(self, report: dict) -> str:
@@ -153,13 +154,30 @@ class ComponentApi:
 
         tmp_md += "\n\n" + report["text"]
 
-        if report.get("reference") is not None:
-            tmp_md += "\n\n>" + str(report["reference"]["text"]).replace("\n\n", "\n")
+        if report.get("updates") is not None and len(report["updates"]) > 0:
+            if self.entry.options.get(CONF_ONLY_SHOW_LAST_UPDATE, True):
+                tmp_md += (
+                    "\n\n>"
+                    + datetime.fromisoformat(
+                        report["updates"][0]["createdTime"]
+                    ).strftime("Kl. %H.%M: ")
+                    + str(report["updates"][0]["text"]).replace("\n\n", "\n")
+                )
+
+            else:
+                for update in report["updates"]:
+                    tmp_md += (
+                        "\n\n>"
+                        + datetime.fromisoformat(update["createdTime"]).strftime(
+                            "Kl. %H.%M: "
+                        )
+                        + str(update["text"]).replace("\n\n", "\n")
+                    )
 
         return tmp_md
 
     # ------------------------------------------------------
-    async def async_important_notice_format(self, report: dict) -> str:
+    def important_notice_format(self, report: dict) -> str:
         """Format important notice."""
 
         return report["text"][:255]
@@ -184,10 +202,8 @@ class ComponentApi:
         """Format traffic reports."""
 
         for report in self.traffic_reports:
-            report["formated_text"] = await self.async_traffic_report_format(report)
-            report["formated_ref_text"] = await self.async_traffic_report_ref_format(
-                report
-            )
+            report["formated_text"] = self.traffic_report_format(report)
+            report["formated_updates_text"] = self.traffic_report_updates_format(report)
             report["formated_md"] = await self.async_traffic_report_format_md(report)
 
     # ------------------------------------------------------
@@ -195,28 +211,8 @@ class ComponentApi:
         """Format notices."""
 
         for notice in self.important_notices:
-            notice["formated_text"] = await self.async_important_notice_format(notice)
+            notice["formated_text"] = self.important_notice_format(notice)
             notice["formated_md"] = await self.async_important_notice_format_md(notice)
-
-    # ------------------------------------------------------
-    async def async_update_traffic_report_last_event_id(self) -> None:
-        """Update traffic report last event id."""
-
-        if len(self.traffic_reports) == 0:
-            self.storage.traffic_report_last_id = ""
-            await self.storage.async_write_settings()
-        elif self.storage.traffic_report_last_id != (
-            self.traffic_reports[0]["_id"]
-            + " "
-            + self.traffic_reports[0]["updatedTime"]
-        ):
-            self.storage.traffic_report_last_id = (
-                self.traffic_reports[0]["_id"]
-                + " "
-                + self.traffic_reports[0]["updatedTime"]
-            )
-
-            await self.storage.async_write_settings()
 
     # ------------------------------------------------------
     async def async_update_important_notice_last_event_id(self) -> None:
@@ -239,31 +235,62 @@ class ComponentApi:
             await self.storage.async_write_settings()
 
     # ------------------------------------------------------
-    async def async_traffic_report_event_fire(self) -> None:
+    async def async_traffic_reports_event_fire(self) -> str:
         """Traffic report event fire."""
 
-        if len(self.traffic_reports) == 0:
-            return
+        # ---------------------
+        async def _fire_event(report: dict) -> str:
+            if report.get("updates") is not None and len(report["updates"]) > 0:
+                tmp_updated_time: str = report["updates"][0]["createdTime"]
+            else:
+                tmp_updated_time = report["updatedTime"]
 
-        if self.storage.traffic_report_last_id != (
-            self.traffic_reports[0]["_id"]
-            + " "
-            + self.traffic_reports[0]["updatedTime"]
-        ):
-            self.hass.bus.async_fire(
-                DOMAIN + "." + EVENT_NEW_TRAFFIC_REPORT,
-                {
-                    "ny_melding": self.traffic_reports[0]["text"],
-                    "reference_tekst": self.traffic_reports[0]["formated_ref_text"],
-                    "region": DICT_REGION[self.traffic_reports[0]["region"]],
-                    "transporttype": DICT_TRANSPORT_TYPE[
-                        self.traffic_reports[0]["type"]
-                    ],
-                    "oprettet_tidspunkt": self.traffic_reports[0]["createdTime"],
-                    "opdateret_tidspunkt": self.traffic_reports[0]["updatedTime"],
-                },
-            )
-        await self.async_update_traffic_report_last_event_id()
+            if (
+                self.storage.traffic_reports_last_id.get(report["_id"], "")
+                != tmp_updated_time
+            ):
+                self.hass.bus.async_fire(
+                    DOMAIN + "." + EVENT_NEW_TRAFFIC_REPORT,
+                    {
+                        "ny_melding": report["text"],
+                        "opdateringer": report["formated_updates_text"],
+                        "region": DICT_REGION[report["region"]],
+                        "transporttype": DICT_TRANSPORT_TYPE[report["type"]],
+                        "oprettet_tidspunkt": report["createdTime"],
+                        "opdateret_tidspunkt": report["updatedTime"],
+                    },
+                )
+                return tmp_updated_time
+
+            return ""
+
+        # ---------------------
+
+        update_stg: bool = False
+
+        if len(self.traffic_reports) == 0:
+            return False
+
+        for report in reversed(self.traffic_reports):
+            if report.get("concluded", True):
+                if self.storage.traffic_reports_last_id.get(report["_id"], "") == "":
+                    continue
+
+                await _fire_event(report)
+
+                self.storage.traffic_reports_last_id.pop(report["_id"], None)
+                update_stg = True
+
+            else:
+                tmp_updated_time = await _fire_event(report)
+
+                if tmp_updated_time != "":
+                    self.storage.traffic_reports_last_id[report["_id"]] = (
+                        tmp_updated_time
+                    )
+                    update_stg = True
+
+        return update_stg
 
     # ------------------------------------------------------
     async def async_important_notice_event_fire(self) -> None:
@@ -288,7 +315,7 @@ class ComponentApi:
         await self.async_update_important_notice_last_event_id()
 
     # ------------------------------------------------------
-    async def async_refresh_traffic_reports(self) -> bool:
+    async def async_refresh_traffic_reports(self) -> None:
         """Refresh traffic report."""
 
         if self.session is None:
@@ -312,19 +339,11 @@ class ComponentApi:
         if await self.async_remove_to_old_traffic_reports():
             tmp_result = True
 
+        if await self.async_traffic_reports_event_fire():
+            tmp_result = True
+
         if tmp_result:
             await self.storage.async_write_settings()
-
-        # Anything changed?
-        if (
-            len(self.traffic_reports) == 0 and self.storage.traffic_report_last_id != ""
-        ) or (
-            len(self.traffic_reports) > 0
-            and self.storage.traffic_report_last_id != self.traffic_reports[0]["_id"]
-        ):
-            return True
-
-        return False
 
     # ------------------------------------------------------
     async def async_refresh_important_notices(self) -> bool:
@@ -362,11 +381,6 @@ class ComponentApi:
         if check_report.get("reference") is not None:
             tmp_txt += check_report["reference"]["text"]
 
-        # res_regx: bool = search(self.regex_str, tmp_txt)
-        # if res_regx:
-        #     tmp_span: tuple = res_regx.span()
-        #     tmp_group: str = res_regx.group()
-
         if self.regex_comp.search(tmp_txt):
             return True
         return False
@@ -379,7 +393,7 @@ class ComponentApi:
             return False
 
         if (
-            dt_util.as_local(datetime.fromisoformat(check_report["createdTime"]))
+            dt_util.as_local(datetime.fromisoformat(check_report["updatedTime"]))
             < self.max_time_back
         ):
             return True
@@ -403,10 +417,32 @@ class ComponentApi:
         return ret_result
 
     # ------------------------------------------------------
-    async def async_get_new_traffic_reports(self, last_entry_date: str = "") -> bool:  # noqa: C901
+    def prepare_traffic_reports(self, reports: list) -> list:
+        """Prepare traffic reports."""
+
+        for tmp_report in reports:
+            tmp_report["region"] = str(tmp_report["region"]).lower().replace("-", "_")
+            tmp_report["type"] = str(tmp_report["type"]).lower().replace("-", "_")
+
+            tmp_report["createdTime"] = (
+                dt_util.as_local(datetime.fromisoformat(tmp_report["createdTime"]))
+            ).isoformat()
+            tmp_report["updatedTime"] = (
+                dt_util.as_local(datetime.fromisoformat(tmp_report["updatedTime"]))
+            ).isoformat()
+
+            if tmp_report.get("updates") is not None:
+                for tmp_update in tmp_report["updates"]:
+                    tmp_update["createdTime"] = dt_util.as_local(
+                        datetime.fromisoformat(tmp_update["createdTime"])
+                    ).isoformat()
+
+        return reports
+
+    # ------------------------------------------------------
+    async def async_get_new_traffic_reports(self, last_entry_date: str = "") -> bool:
         """Get new traffic report."""
 
-        remove_references: bool = self.entry.options.get(CONF_REMOVE_REFERENCES, True)
         done: bool = False
         ret_result: bool = False
 
@@ -445,50 +481,22 @@ class ComponentApi:
 
                 last_entry_date = tmp_json[-1]["createdTime"]
 
-                for tmp_report in tmp_json:
-                    tmp_report["region"] = (
-                        str(tmp_report["region"]).lower().replace("-", "_")
-                    )
-                    tmp_report["type"] = (
-                        str(tmp_report["type"]).lower().replace("-", "_")
-                    )
-
-                    tmp_report["createdTime"] = (
-                        dt_util.as_local(
-                            datetime.fromisoformat(tmp_report["createdTime"])
-                        )
-                    ).isoformat()
-                    tmp_report["updatedTime"] = (
-                        dt_util.as_local(
-                            datetime.fromisoformat(tmp_report["updatedTime"])
-                        )
-                    ).isoformat()
-
-                    if tmp_report.get("reference") is not None:
-                        tmp_report["reference"]["createdTime"] = dt_util.as_local(
-                            datetime.fromisoformat(
-                                tmp_report["reference"]["createdTime"]
-                            )
-                        )
-
-                    if tmp_report.get("reference") is not None:
-                        tmp_report["reference"]["updatedTime"] = dt_util.as_local(
-                            datetime.fromisoformat(
-                                tmp_report["reference"]["updatedTime"]
-                            )
-                        )
+                tmp_json = self.prepare_traffic_reports(tmp_json)
 
                 if await self.async_is_old_report(tmp_json[0]):
                     return False
 
                 tmp_report: dict
 
-                for tmp_report in reversed(tmp_json):
+                for tmp_report in tmp_json:
                     id_found: bool = False
 
-                    for report in self.traffic_reports:
+                    for idx, report in enumerate(self.traffic_reports):
                         if report["_id"] == tmp_report["_id"]:
                             id_found = True
+                            tmp_read: bool = report.get("read", False)
+                            self.traffic_reports[idx] = tmp_report
+                            self.traffic_reports[idx]["read"] = tmp_read
                             break
 
                     if id_found:
@@ -497,19 +505,11 @@ class ComponentApi:
                     if await self.async_is_old_report(
                         tmp_report
                     ) is False and await self.async_is_match_traffic_report(tmp_report):
-                        self.traffic_reports.insert(0, tmp_report)
-                        self.traffic_reports[0]["read"] = False
+                        tmp_report["read"] = False
+                        self.traffic_reports.append(tmp_report)
                         ret_result = True
 
-                if remove_references:
-                    for tmp_report in self.traffic_reports:
-                        if tmp_report.get("reference") is not None:
-                            for ref_report in reversed(self.traffic_reports):
-                                if tmp_report["reference"]["_id"] == ref_report["_id"]:
-                                    self.traffic_reports.remove(ref_report)
-                                    break
-
-                self.traffic_reports.sort(key=lambda x: x["createdTime"], reverse=True)
+                self.traffic_reports.sort(key=lambda x: x["updatedTime"], reverse=True)
 
                 if max_row_fetch > 0 and len(self.traffic_reports) > max_row_fetch:
                     done = True

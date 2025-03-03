@@ -25,8 +25,9 @@
           "transport_type": "Transporttype",
           "max_time_back": "Only fetch trafic reports that are maximum hours old",
           "max_row_fetch": "Fetch maximum trafic reports",
-          "remove_references": "Hide traffic messages that are referenced.",
-          "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
+          "only_show_last_update": "Only show the last update.",
+          "rotate_every_minutes": "Rotate between traffic reports every minutes",
+          "listen_to_timer_trigger": "Or use a Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
         }
       },
@@ -56,8 +57,9 @@
           "transport_type": "Transporttype",
           "max_time_back": "Only fetch trafic reports that are maximum hours old",
           "max_row_fetch": "Fetch maximum trafic reports",
-          "remove_references": "Hide traffic messages that are referenced.",
-          "listen_to_timer_trigger": "Use Timer helper as scroll trigger",
+          "only_show_last_update": "Only show the last update.",
+          "rotate_every_minutes": "Rotate between traffic reports every minutes",
+          "listen_to_timer_trigger": "Or use a Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
         }
       },

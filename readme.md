@@ -85,7 +85,7 @@ Følgende udløser hændelses data er tilgængelige for automatiseringen for 'Ny
 ```
 
 ```Python
-{{ trigger.event.data.reference_tekst }}
+{{ trigger.event.data.opdateringer }} ## Liste af opdateringer
 ```
 
 ```Python
@@ -140,8 +140,8 @@ actions:
               message: |-
                 {{ trigger.event.data.ny_melding }}
 
-                {% if trigger.event.data.reference_tekst != '' %}
-                Reference: {{trigger.event.data.reference_tekst}}
+                {% if trigger.event.data.opdateringer|length > 0 %}
+                Opdatering: {{trigger.event.data.opdateringer[0]}}
                 {% endif %}
       - conditions:
           - condition: trigger

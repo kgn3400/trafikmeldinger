@@ -6,7 +6,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import CommonConfigEntry
-from .const import CONF_LISTEN_TO_TIMER_TRIGGER
 from .important_notice_sensor import ImportantNoticeLatestSensor
 from .traffic_report_sensor import TrafficReportLatestSensor, TrafficReportRotateSensor
 
@@ -24,7 +23,6 @@ async def async_setup_entry(
         TrafficReportLatestSensor(hass, entry),
     ]
 
-    if entry.options.get(CONF_LISTEN_TO_TIMER_TRIGGER, ""):
-        sensors.append(TrafficReportRotateSensor(hass, entry))
+    sensors.append(TrafficReportRotateSensor(hass, entry))
 
     async_add_entities(sensors)

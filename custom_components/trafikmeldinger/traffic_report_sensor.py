@@ -15,6 +15,7 @@ from .component_api import ComponentApi
 from .const import (
     CONF_LISTEN_TO_TIMER_TRIGGER,
     CONF_RESTART_TIMER,
+    CONF_ROTATE_EVERY_MINUTES,
     DICT_REGION,
     DICT_TRANSPORT_TYPE,
     DOMAIN,
@@ -193,8 +194,6 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         """Refresh."""
         await self.component_api.async_refresh_traffic_reports()
 
-        await self.component_api.async_traffic_report_event_fire()
-
         self.async_write_ha_state()
 
     # ------------------------------------------------------
@@ -244,8 +243,8 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["reference_tekst"] = self.component_api.traffic_reports[0][
-            "formated_ref_text"
+        attr["opdateringer"] = self.component_api.traffic_reports[0][
+            "formated_updates_text"
         ]
         attr["markdown"] = self.component_api.traffic_reports[0]["formated_md"]
         attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
@@ -351,13 +350,15 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         self.translation_key = TRANSLATION_KEY
 
-        if entry.options.get(CONF_LISTEN_TO_TIMER_TRIGGER, ""):
-            self.timer_trigger = TimerTrigger(
-                self,
-                entry.options.get(CONF_LISTEN_TO_TIMER_TRIGGER, ""),
-                self.async_refresh,
-                entry.options.get(CONF_RESTART_TIMER, False),
-            )
+        self.timer_trigger = TimerTrigger(
+            self,
+            timer_entity=entry.options.get(CONF_LISTEN_TO_TIMER_TRIGGER, ""),
+            duration=timedelta(
+                minutes=entry.options.get(CONF_ROTATE_EVERY_MINUTES, 0.5)
+            ),
+            callback_trigger=self.async_refresh,
+            auto_restart=entry.options.get(CONF_RESTART_TIMER, False),
+        )
 
         hass.services.async_register(
             DOMAIN,
@@ -433,9 +434,9 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["reference_tekst"] = self.component_api.traffic_reports[
+        attr["opdateringer"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
-        ]["formated_ref_text"]
+        ]["formated_updates_text"]
 
         attr["markdown"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
