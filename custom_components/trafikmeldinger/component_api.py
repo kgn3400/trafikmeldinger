@@ -4,6 +4,7 @@ from asyncio import timeout
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import partial
+from logging import Logger
 from re import IGNORECASE, compile
 
 from aiohttp.client import ClientSession
@@ -30,8 +31,12 @@ from .const import (
     DOMAIN,
     EVENT_NEW_IMPORTANT_NOTICE,
     EVENT_NEW_TRAFFIC_REPORT,
+    STORAGE_KEY,
+    STORAGE_VERSION,
 )
-from .storage_json import StorageJson
+
+# from .storage_json import StorageJson
+from .hass_util import StorageJson, handle_retries
 
 
 # ------------------------------------------------------
@@ -44,7 +49,7 @@ class TrafficStorage(StorageJson):
     def __init__(self, hass: HomeAssistant) -> None:
         """Message log settings."""
 
-        super().__init__(hass)
+        super().__init__(hass, STORAGE_KEY, STORAGE_VERSION)
 
         self.traffic_reports_last_id: dict[str, str] = {}
         self.important_notice_last_id: str = ""
@@ -188,9 +193,8 @@ class ComponentApi:
 
         tmp_md: str = '###  <font color=red> <ha-icon icon="mdi:exclamation-thick"></ha-icon></font> '
 
-        tmp_md += (
-            " "
-            + str(await self.async_relative_time(report["createdTime"])).capitalize()
+        tmp_md += " Vigtig meddelelse " + str(
+            await self.async_relative_time(report["updatedTime"])
         )
 
         tmp_md += "\n\n" + report["text"]
@@ -414,6 +418,11 @@ class ComponentApi:
                     # self.traffic_reports.remove(report)
                     ret_result = True
 
+            if len(self.traffic_reports) == 0:
+                self.traffic_report_rotate_pos = -1
+            elif self.traffic_report_rotate_pos >= len(self.traffic_reports):
+                self.traffic_report_rotate_pos = 0
+
         return ret_result
 
     # ------------------------------------------------------
@@ -442,6 +451,17 @@ class ComponentApi:
     # ------------------------------------------------------
     async def async_get_new_traffic_reports(self, last_entry_date: str = "") -> bool:
         """Get new traffic report."""
+
+        # ------------------------
+        @handle_retries(retries=5, retry_delay=5)
+        async def _async_get_new_traffic_reports(traffic_report_url: str) -> list:
+            async with timeout(self.request_timeout):
+                response = await self.session.get(traffic_report_url)
+                tmp_json: list = await response.json()
+
+            return tmp_json
+
+        # ------------------------
 
         done: bool = False
         ret_result: bool = False
@@ -472,53 +492,54 @@ class ComponentApi:
         traffic_report_url: str = f"https://api.dr.dk/trafik/posts?{region_part_url}{transport_type_part_url}lastPostDate={last_entry_date}"
 
         try:
-            async with timeout(self.request_timeout):
-                response = await self.session.get(traffic_report_url)
-                tmp_json: list = await response.json()
-
-                if len(tmp_json) == 0:
-                    return False
-
-                last_entry_date = tmp_json[-1]["createdTime"]
-
-                tmp_json = self.prepare_traffic_reports(tmp_json)
-
-                if await self.async_is_old_report(tmp_json[0]):
-                    return False
-
-                tmp_report: dict
-
-                for tmp_report in tmp_json:
-                    id_found: bool = False
-
-                    for idx, report in enumerate(self.traffic_reports):
-                        if report["_id"] == tmp_report["_id"]:
-                            id_found = True
-                            tmp_read: bool = report.get("read", False)
-                            self.traffic_reports[idx] = tmp_report
-                            self.traffic_reports[idx]["read"] = tmp_read
-                            break
-
-                    if id_found:
-                        continue
-
-                    if await self.async_is_old_report(
-                        tmp_report
-                    ) is False and await self.async_is_match_traffic_report(tmp_report):
-                        tmp_report["read"] = False
-                        self.traffic_reports.append(tmp_report)
-                        ret_result = True
-
-                self.traffic_reports.sort(key=lambda x: x["updatedTime"], reverse=True)
-
-                if max_row_fetch > 0 and len(self.traffic_reports) > max_row_fetch:
-                    done = True
-
-                    for _ in range(len(self.traffic_reports) - max_row_fetch):
-                        self.traffic_reports.pop()
+            tmp_json: list = await _async_get_new_traffic_reports(traffic_report_url)
 
         except TimeoutError:
-            pass
+            return False
+        except Exception as e:  # noqa: BLE001
+            Logger.error(f"Error fetching traffic reports: {e}")
+            return False
+
+        if len(tmp_json) == 0:
+            return False
+
+        last_entry_date = tmp_json[-1]["createdTime"]
+
+        tmp_json = self.prepare_traffic_reports(tmp_json)
+
+        if await self.async_is_old_report(tmp_json[0]):
+            return False
+
+        tmp_report: dict
+
+        for tmp_report in tmp_json:
+            id_found: bool = False
+
+            for idx, report in enumerate(self.traffic_reports):
+                if report["_id"] == tmp_report["_id"]:
+                    id_found = True
+                    tmp_read: bool = report.get("read", False)
+                    self.traffic_reports[idx] = tmp_report
+                    self.traffic_reports[idx]["read"] = tmp_read
+                    break
+
+            if id_found:
+                continue
+
+            if await self.async_is_old_report(
+                tmp_report
+            ) is False and await self.async_is_match_traffic_report(tmp_report):
+                tmp_report["read"] = False
+                self.traffic_reports.append(tmp_report)
+                ret_result = True
+
+        self.traffic_reports.sort(key=lambda x: x["updatedTime"], reverse=True)
+
+        if max_row_fetch > 0 and len(self.traffic_reports) > max_row_fetch:
+            done = True
+
+            for _ in range(len(self.traffic_reports) - max_row_fetch):
+                self.traffic_reports.pop()
 
         if not done:
             if await self.async_get_new_traffic_reports(last_entry_date) is True:
@@ -530,38 +551,50 @@ class ComponentApi:
     async def async_get_important_notices(self) -> bool:
         """Get important notices."""
 
+        # ------------------------
+        @handle_retries(retries=5, retry_delay=5)
+        async def _async_get_important_notices(important_notices_url: str) -> list:
+            async with timeout(self.request_timeout):
+                response = await self.session.get(important_notices_url)
+                tmp_json: list = await response.json()
+
+            return tmp_json
+
+        # ------------------------
+
         ret_result: bool = False
 
         important_notices_url: str = "https://api.dr.dk/trafik/notices"
 
         try:
-            async with timeout(self.request_timeout):
-                response = await self.session.get(important_notices_url)
-                tmp_json: list = await response.json()
-
-                if len(tmp_json) == 0:
-                    self.important_notices.clear()
-                    return False
-
-                for tmp_notice in reversed(tmp_json):
-                    id_found: bool = False
-
-                    for report in self.important_notices:
-                        if (report["_id"] + report["updatedTime"]) == (
-                            tmp_notice["_id"] + tmp_notice["updatedTime"]
-                        ):
-                            id_found = True
-                            break
-
-                    if id_found:
-                        continue
-
-                    self.important_notices.insert(0, tmp_notice)
-                    self.important_notices[0]["read"] = False
-                    ret_result = True
+            tmp_json: list = await _async_get_important_notices(important_notices_url)
 
         except TimeoutError:
-            pass
+            return False
+        except Exception as e:  # noqa: BLE001
+            Logger.error(f"Error fetching important notices: {e}")
+            return False
+
+        if len(tmp_json) == 0:
+            self.important_notices.clear()
+            return False
+
+        for tmp_notice in reversed(tmp_json):
+            id_found: bool = False
+
+            for report in self.important_notices:
+                if (report["_id"] + report["updatedTime"]) == (
+                    tmp_notice["_id"] + tmp_notice["updatedTime"]
+                ):
+                    id_found = True
+                    break
+
+            if id_found:
+                continue
+
+            self.important_notices.insert(0, tmp_notice)
+            self.important_notices[0]["read"] = False
+            ret_result = True
 
         # Remove important notices older than max_time_back
         if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:

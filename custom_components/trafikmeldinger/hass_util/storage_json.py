@@ -1,14 +1,16 @@
-"""Settings handling."""
+"""Json storage.
+
+External imports: jsonpickle
+"""
 
 from collections.abc import Callable
+import inspect
 from typing import Any
 
 import jsonpickle
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
-
-from .const import STORAGE_KEY, STORAGE_VERSION
 
 
 # ------------------------------------------------------------------
@@ -28,28 +30,45 @@ class StoreMigrate(Store):
         """Migrate to the new version."""
 
         if self.custom_migrate_func is not None:
-            return await self.custom_migrate_func(
+            if inspect.iscoroutinefunction(self.custom_migrate_func):
+                return await self.custom_migrate_func(
+                    old_major_version, old_minor_version, old_data
+                )
+
+            return self.custom_migrate_func(
                 old_major_version, old_minor_version, old_data
             )
-
         return old_data
 
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
 class StorageJson:
-    """Settings class."""
+    """Json storage class.
+
+    This class is used to store data in a json file.
+
+    External imports: jsonpickle
+    """
 
     def __init__(
         self,
         hass: HomeAssistant,
+        key: str,
+        version: int = 1,
+        minor_version: int = 1,
         async_migrate_func: Callable[[int, int, Any], Any] | None = None,
     ) -> None:
         """Init."""
 
         self.write_hidden_attributes___: bool = False
         self.hass___ = hass
-        self.store___ = StoreMigrate(self.hass___, STORAGE_VERSION, STORAGE_KEY)
+        self.store___ = StoreMigrate(
+            self.hass___,
+            version,
+            key,
+            minor_version=minor_version,
+        )
         self.store___.custom_migrate_func = async_migrate_func
 
     # ------------------------------------------------------------------

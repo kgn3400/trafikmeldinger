@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import MATCH_ALL
 from homeassistant.core import Event, HomeAssistant, ServiceCall, callback
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import CommonConfigEntry
@@ -19,11 +19,15 @@ from .const import (
     DICT_REGION,
     DICT_TRANSPORT_TYPE,
     DOMAIN,
+    DOMAIN_NAME,
     LOGGER,
     TRANSLATION_KEY,
+    TRANSLATION_KEY_MISSING_TIMER_ENTITY,
 )
 from .entity import ComponentEntity
-from .timer_trigger import TimerTrigger
+
+# from .timer_trigger import TimerTrigger, TimerTriggerErrorEnum
+from .hass_util import TimerTrigger, TimerTriggerErrorEnum
 
 
 # ------------------------------------------------------
@@ -223,7 +227,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ):
             return None
 
-        return self.component_api.traffic_reports[0]["formated_text"]
+        return self.component_api.traffic_reports[0].get("formated_text", "")
 
     # ------------------------------------------------------
     @property
@@ -380,8 +384,31 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         await self.async_refresh(False)
 
     # ------------------------------------------------------
-    async def async_refresh(self, error: bool) -> None:
+    async def async_refresh(self, error: TimerTriggerErrorEnum) -> None:
         """Refresh."""
+
+        if error:
+            match error:
+                case TimerTriggerErrorEnum.MISSING_TIMER_ENTITY:
+                    ir.async_create_issue(
+                        self.hass,
+                        DOMAIN,
+                        DOMAIN_NAME + datetime.now().isoformat(),
+                        issue_domain=DOMAIN,
+                        is_fixable=False,
+                        severity=ir.IssueSeverity.WARNING,
+                        translation_key=TRANSLATION_KEY_MISSING_TIMER_ENTITY,
+                        translation_placeholders={
+                            "timer_entity": self.entry.options.get(
+                                CONF_LISTEN_TO_TIMER_TRIGGER, ""
+                            ),
+                            "entity": self.entity_id,
+                        },
+                    )
+                case _:
+                    pass
+            return
+
         self.component_api.get_next_traffic_report_pos()
         self.async_write_ha_state()
 
@@ -414,7 +441,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         return self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
-        ]["formated_text"]
+        ].get("formated_text", "")
 
     # ------------------------------------------------------
     @property

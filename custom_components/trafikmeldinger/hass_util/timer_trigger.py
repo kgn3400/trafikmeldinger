@@ -1,26 +1,45 @@
-"""Timer trigger class."""
+"""Timer trigger.
+
+External imports: None
+"""
 
 from datetime import datetime, timedelta
+from enum import Enum
 import inspect
 
 from homeassistant.const import ATTR_ENTITY_ID
-from homeassistant.core import CALLBACK_TYPE, Event, State, callback
-from homeassistant.helpers import issue_registry as ir, start
+from homeassistant.core import Event, State, callback
+from homeassistant.helpers import start
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.util import Callable, dt as dt_util
 
-from .const import DOMAIN, DOMAIN_NAME
-
+# ------------------------------------------------------
 # ------------------------------------------------------
 
-TRANSLATION_KEY_MISSING__TIMER_ENTITY = "missing_timer_entity"
+
+class TimerTriggerErrorEnum(Enum):
+    """Error to indicate unknown timer helper."""
+
+    NONE = 0
+    MISSING_TIMER_ENTITY = 1
+    UNKNOWN_ERROR = 2
+
+    # ------------------------------------------------------
+
+    def __bool__(self):
+        """Return if error."""
+        return self != TimerTriggerErrorEnum.NONE
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
 class TimerTrigger:
-    """Timer trigger class."""
+    """Timer trigger class.
+
+    External imports: None
+
+    """
 
     restarting_timer: bool = False
 
@@ -29,7 +48,7 @@ class TimerTrigger:
         entity: Entity,
         timer_entity: str = "",
         duration: timedelta | None = None,
-        callback_trigger: CALLBACK_TYPE = None,
+        callback_trigger: Callable[[TimerTriggerErrorEnum], None] = None,
         auto_restart: bool = True,
     ) -> None:
         """Init."""
@@ -41,13 +60,18 @@ class TimerTrigger:
         ):
             raise ValueError("timer_entity or duration must be provided")
 
+        if callback_trigger is None:
+            raise ValueError("callback_trigger must be provided")
+
         self.entity: Entity = entity
         self.timer_entity: str = timer_entity
         self.duration: timedelta | None = duration
-        self.callback_trigger: CALLBACK_TYPE = callback_trigger
+        self.callback_trigger: Callable[[TimerTriggerErrorEnum], None] | None = (
+            callback_trigger
+        )
         self.auto_restart: bool = auto_restart
 
-        self.error: bool = False
+        self.error: TimerTriggerErrorEnum = TimerTriggerErrorEnum.NONE
         self.timer_state: State
         self.unsub_async_track_point_in_utc_time: Callable[[], None] | None = None
 
@@ -62,21 +86,8 @@ class TimerTrigger:
         state: State = self.entity.hass.states.get(self.timer_entity)
 
         if state is None:
-            self.error = True
+            self.error = TimerTriggerErrorEnum.MISSING_TIMER_ENTITY
 
-            ir.async_create_issue(
-                self.entity.hass,
-                DOMAIN,
-                DOMAIN_NAME + datetime.now().isoformat(),
-                issue_domain=DOMAIN,
-                is_fixable=False,
-                severity=ir.IssueSeverity.WARNING,
-                translation_key=TRANSLATION_KEY_MISSING__TIMER_ENTITY,
-                translation_placeholders={
-                    "timer_entity": self.timer_entity,
-                    "entity": self.entity.entity_id,
-                },
-            )
             if inspect.iscoroutinefunction(self.callback_trigger):
                 await self.callback_trigger(self.error)
             else:
@@ -115,6 +126,9 @@ class TimerTrigger:
     async def async_point_in_time_listener(self, time_date: datetime) -> None:
         """Point in time listener."""
 
+        if self.error:
+            return
+
         if self.unsub_async_track_point_in_utc_time:
             self.unsub_async_track_point_in_utc_time()
             self.unsub_async_track_point_in_utc_time = None
@@ -130,12 +144,13 @@ class TimerTrigger:
     def point_in_time_listener_start(self) -> None:
         """Point in time listener start."""
 
-        if not self.error:
-            self.unsub_async_track_point_in_utc_time = async_track_point_in_utc_time(
-                self.entity.hass,
-                self.async_point_in_time_listener,
-                dt_util.utcnow() + self.duration,
-            )
+        if self.error:
+            return
+        self.unsub_async_track_point_in_utc_time = async_track_point_in_utc_time(
+            self.entity.hass,
+            self.async_point_in_time_listener,
+            dt_util.utcnow() + self.duration,
+        )
 
     # ------------------------------------------------------------------
     @callback
@@ -168,8 +183,18 @@ class TimerTrigger:
                     await self.async_restart_timer()
 
         else:
+            self.entity.async_on_remove(self.async_remove_from_hass)
+
             self.unsub_async_track_point_in_utc_time = async_track_point_in_utc_time(
                 self.entity.hass,
                 self.async_point_in_time_listener,
                 dt_util.utcnow() + self.duration,
             )
+
+    # ------------------------------------------------------
+    @callback
+    def async_remove_from_hass(self) -> None:
+        """Handle removal from Hass."""
+        if self.unsub_async_track_point_in_utc_time:
+            self.unsub_async_track_point_in_utc_time()
+            self.unsub_async_track_point_in_utc_time = None

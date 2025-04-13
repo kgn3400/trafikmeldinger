@@ -7,6 +7,7 @@ DOMAIN_NAME = "Trafikmeldinger"
 LOGGER: Logger = getLogger(__name__)
 
 TRANSLATION_KEY = DOMAIN
+TRANSLATION_KEY_MISSING_TIMER_ENTITY = "missing_timer_entity"
 
 CONF_REGION = "region"
 CONF_REGION_ALL = "all"
