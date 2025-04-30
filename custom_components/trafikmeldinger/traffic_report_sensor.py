@@ -9,11 +9,13 @@ from homeassistant.const import MATCH_ALL
 from homeassistant.core import Event, HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from . import CommonConfigEntry
 from .component_api import ComponentApi
 from .const import (
     CONF_LISTEN_TO_TIMER_TRIGGER,
+    CONF_MAX_TIME_BACK,
     CONF_RESTART_TIMER,
     CONF_ROTATE_EVERY_MINUTES,
     DICT_REGION,
@@ -261,6 +263,14 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         attr["opdateret_tidspunkt"] = self.component_api.traffic_reports[0][
             "updatedTime"
         ]
+        attr["afsluttet"] = self.component_api.traffic_reports[0].get(
+            "concluded", False
+        )
+        attr["for_gammel_tidspunkt"] = dt_util.as_local(
+            datetime.fromisoformat(self.component_api.traffic_reports[0]["updatedTime"])
+            + timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK, 0))
+        )
+
         attr["antal_trafikmeldinger"] = len(self.component_api.traffic_reports)
         attr["markeret_som_læst"] = self.component_api.storage.marked_as_read
 

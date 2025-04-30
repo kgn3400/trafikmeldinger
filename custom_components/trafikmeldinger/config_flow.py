@@ -35,6 +35,7 @@ from .const import (
     CONF_MATCH_WORD,
     CONF_MAX_ROW_FETCH,
     CONF_MAX_TIME_BACK,
+    CONF_MAX_TIME_BACK_CONCLUDED,
     CONF_ONLY_SHOW_LAST_UPDATE,
     CONF_REGION,
     CONF_REGION_ALL,
@@ -113,6 +114,17 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
             )
         ),
         vol.Required(
+            CONF_MAX_TIME_BACK_CONCLUDED,
+            default=2,
+        ): NumberSelector(
+            NumberSelectorConfig(
+                min=0,
+                max=48,
+                mode=NumberSelectorMode.BOX,
+                unit_of_measurement="timer",
+            )
+        ),
+        vol.Required(
             CONF_MAX_ROW_FETCH,
             default=20,
         ): NumberSelector(
@@ -136,7 +148,7 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
                 max=999,
                 step="any",
                 mode=NumberSelectorMode.BOX,
-                unit_of_measurement="minuter",
+                unit_of_measurement="minutter",
             )
         ),
         vol.Optional(

@@ -2,8 +2,7 @@
 
 from asyncio import timeout
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from functools import partial
+from datetime import UTC, datetime, timedelta
 from logging import Logger
 from re import IGNORECASE, compile
 
@@ -20,6 +19,7 @@ from .const import (
     CONF_MATCH_WORD,
     CONF_MAX_ROW_FETCH,
     CONF_MAX_TIME_BACK,
+    CONF_MAX_TIME_BACK_CONCLUDED,
     CONF_ONLY_SHOW_LAST_UPDATE,
     CONF_REGION,
     CONF_REGION_ALL,
@@ -36,7 +36,7 @@ from .const import (
 )
 
 # from .storage_json import StorageJson
-from .hass_util import StorageJson, handle_retries
+from .hass_util import StorageJson, async_hass_add_executor_job, handle_retries
 
 
 # ------------------------------------------------------
@@ -104,30 +104,24 @@ class ComponentApi:
                 else compile(self.regex_str, IGNORECASE)
             )
 
-        self.max_time_back: datetime = None
+        self._max_time_back: datetime = None
+        self._max_time_back_concluded: datetime = None
 
     # ------------------------------------------------------------------
-    async def async_relative_time(self, iso_datetime: str) -> str:
+    @async_hass_add_executor_job()
+    def relative_time(self, iso_datetime: str) -> str:
         """Relative time."""
 
-        now = dt_util.now()
-        diff: timedelta = datetime.fromisoformat(iso_datetime) - now
-        # diff: timedelta = dt_util.as_local(datetime.fromisoformat(iso_datetime)) - now
+        diff: timedelta = datetime.fromisoformat(iso_datetime) - dt_util.now()
 
-        diff_str: str = await self.hass.async_add_executor_job(
-            partial(
-                format_timedelta,
-                delta=diff,
-                add_direction=True,
-                locale="da",
-            )
-        )
-        return diff_str
+        return format_timedelta(diff, add_direction=True, locale="da")
 
     # ------------------------------------------------------
     def traffic_report_format(self, report: dict) -> str:
         """Format traffic report."""
 
+        if report.get("concluded", False):
+            return "Afsluttet -" + report["text"][:243]
         return report["text"][:255]
 
     # ------------------------------------------------------
@@ -146,18 +140,32 @@ class ComponentApi:
 
         tmp_md: str = ""
 
+        if report.get("concluded", False):
+            tmp_color: str = "green"
+        else:
+            tmp_color = "red"
+
         if report["type"] == CONF_TRANSPORT_TYPE_PRIVATE:
-            tmp_md = '###  <font color=red> <ha-icon icon="mdi:car"></ha-icon></font> '
+            tmp_md = (
+                "###  <font color="
+                + tmp_color
+                + '> <ha-icon icon="mdi:car"></ha-icon></font> '
+            )
         else:
             tmp_md = (
-                '###  <font color=red> <ha-icon icon="mdi:train-bus"></ha-icon></font> '
+                "###  <font color="
+                + tmp_color
+                + '> <ha-icon icon="mdi:train-bus"></ha-icon></font> '
             )
 
         tmp_md += DICT_REGION[report["region"]]
 
-        tmp_md += " " + await self.async_relative_time(report["createdTime"])
+        tmp_md += " " + await self.relative_time(report["createdTime"])
 
-        tmp_md += "\n\n" + report["text"]
+        if report.get("concluded", False):
+            tmp_md += "\n\n**Afsluttet** - " + report["text"]
+        else:
+            tmp_md += "\n\n" + report["text"]
 
         if report.get("updates") is not None and len(report["updates"]) > 0:
             if self.entry.options.get(CONF_ONLY_SHOW_LAST_UPDATE, True):
@@ -194,7 +202,7 @@ class ComponentApi:
         tmp_md: str = '###  <font color=red> <ha-icon icon="mdi:exclamation-thick"></ha-icon></font> '
 
         tmp_md += " Vigtig meddelelse " + str(
-            await self.async_relative_time(report["updatedTime"])
+            await self.relative_time(report["updatedTime"])
         )
 
         tmp_md += "\n\n" + report["text"]
@@ -319,6 +327,22 @@ class ComponentApi:
         await self.async_update_important_notice_last_event_id()
 
     # ------------------------------------------------------
+    # def set_max_time_back(self) -> None:
+    #     """Set max time back."""
+
+    #     if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
+    #         self._max_time_back: datetime = dt_util.as_local(
+    #             datetime.now(UTC)
+    #         ) - timedelta(hours=self.entry.options[CONF_MAX_TIME_BACK])
+
+    #     else:
+    #         self._max_time_back = None
+
+    #     self._max_time_back_concluded: datetime = dt_util.as_local(
+    #         datetime.now(UTC)
+    #     ) - timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK_CONCLUDED, 2))
+
+    # ------------------------------------------------------
     async def async_refresh_traffic_reports(self) -> None:
         """Refresh traffic report."""
 
@@ -326,12 +350,7 @@ class ComponentApi:
             self.session = ClientSession()
             self.close_session = True
 
-        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            self.max_time_back: datetime = dt_util.as_local(
-                dt_util.now() - timedelta(hours=self.entry.options[CONF_MAX_TIME_BACK])
-            )
-        else:
-            self.max_time_back = None
+        # self.set_max_time_back()
 
         tmp_result: bool = await self.async_get_new_traffic_reports()
 
@@ -357,10 +376,7 @@ class ComponentApi:
             self.session = ClientSession()
             self.close_session = True
 
-        if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-            self.max_time_back: datetime = dt_util.as_local(
-                dt_util.now() - timedelta(hours=self.entry.options[CONF_MAX_TIME_BACK])
-            )
+        # self.set_max_time_back()
 
         tmp_result: bool = await self.async_get_important_notices()
         await self.async_formatted_important_notices()
@@ -393,16 +409,44 @@ class ComponentApi:
     async def async_is_old_report(self, check_report: dict) -> bool:
         """Check of traffic report is to old."""
 
-        if self.max_time_back is None:
-            return False
+        # tmp_rep_time = dt_util.as_local(
+        #     datetime.fromisoformat(check_report.get("updatedTime"))
+        # ) + timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK, 0))
+
+        # tmp_now = dt_util.as_local(datetime.now(UTC))
 
         if (
-            dt_util.as_local(datetime.fromisoformat(check_report["updatedTime"]))
-            < self.max_time_back
-        ):
+            dt_util.as_local(datetime.fromisoformat(check_report.get("updatedTime")))
+            + timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK, 0))
+        ) < dt_util.as_local(datetime.now(UTC)):
             return True
 
+        if check_report.get("concluded", False) is True:
+            if (
+                dt_util.as_local(
+                    datetime.fromisoformat(check_report.get("updatedTime"))
+                )
+                + timedelta(
+                    hours=self.entry.options.get(CONF_MAX_TIME_BACK_CONCLUDED, 2)
+                )
+            ) < dt_util.as_local(datetime.now(UTC)):
+                return True
+
         return False
+
+        # if (
+        #     self._max_time_back is not None
+        #     and datetime.fromisoformat(check_report["updatedTime"])
+        #     < self._max_time_back
+        # ):
+        #     return True
+
+        # if check_report.get("concluded", False) is True:
+        #     if (
+        #         datetime.fromisoformat(check_report["updatedTime"])
+        #         < self._max_time_back_concluded
+        #     ):
+        #         return True
 
     # ------------------------------------------------------
     async def async_remove_to_old_traffic_reports(self) -> bool:

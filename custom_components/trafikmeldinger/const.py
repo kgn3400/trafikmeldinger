@@ -41,6 +41,7 @@ DICT_TRANSPORT_TYPE = {
 }
 
 CONF_MAX_TIME_BACK = "max_time_back"
+CONF_MAX_TIME_BACK_CONCLUDED = "max_time_back_concluded"
 CONF_MAX_ROW_FETCH = "max_row_fetch"
 CONF_ONLY_SHOW_LAST_UPDATE = "only_show_last_update"
 CONF_RESTART_TIMER = "restart_timer"
