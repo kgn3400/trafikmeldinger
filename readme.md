@@ -11,7 +11,7 @@ Der kan filtreres efter region, transporttype, max timer gamle og ord/sætning d
 
 ## Installation
 
-For installationsvejledning, indtil Trafikmeldinger integrationen bliver en del af HACS, [se denne guide](https://hacs.xyz/docs/faq/custom_repositories).
+For at installere Trafikmeldinger integrationen, søg efter `Trafikmeldinger` i HACS og download.
 Eller klik på
 [![My Home Assistant](https://img.shields.io/badge/Home%20Assistant-%2341BDF5.svg?style=flat&logo=home-assistant&label=Add%20to%20HACS)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kgn3400&repository=trafikmeldinger&category=integration)
 
