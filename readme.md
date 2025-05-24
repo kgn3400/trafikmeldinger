@@ -162,4 +162,6 @@ actions:
 mode: single
 ```
 
+### Support
+
 Hvis du synes godt om denne integration, eller finder den brugbar, må du meget gerne give den en ⭐️ på GitHub 👍 Det vil blive værdsat!
