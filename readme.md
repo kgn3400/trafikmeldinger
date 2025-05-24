@@ -6,8 +6,15 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kgn3400/trafikmeldinger)
 [![Validate% with hassfest](https://github.com/kgn3400/trafikmeldinger/workflows/Validate%20with%20hassfest/badge.svg)](https://github.com/kgn3400/trafikmeldinger/actions/workflows/hassfest.yaml)
 
-Trafikmeldinger integrationen giver dig mulighed for at se vigtige trafikmeldinger fra [dr.dk/trafik](https://dr.dk/trafik).
-Der kan filtreres efter region, transporttype, max timer gamle og ord/sætning der skal matche teksten i trafikmeldingen.
+Trafikmeldinger integrationen giver dig nem adgang til de seneste og vigtigste trafikmeldinger direkte fra [dr.dk/trafik](https://dr.dk/trafik). Med denne integration kan du altid holde dig opdateret om aktuelle trafikale forhold og hændelser i dit område.
+Du kan tilpasse visningen af trafikmeldinger ved at filtrere efter:
+
+* 'Region: Vælg én eller flere regioner for kun at se relevante meldinger for dit område.'
+* 'Transporttype: Filtrér efter f.eks. vejtrafik, tog, bus eller færge, så du kun ser meldinger for de transportformer, der interesserer dig.'
+* 'Maksimal alder: Angiv hvor mange timer gamle meldingerne må være, så du kun får vist de nyeste og mest relevante informationer.'
+* 'Søgeord eller sætninger: Indtast specifikke ord eller sætninger, som skal matche teksten i trafikmeldingen, for at fokusere på bestemte hændelser eller emner.'
+
+Med denne fleksible filtrering får du præcis de trafikmeldinger, der er relevante for dig, direkte ind i dit Home Assistant-dashboard.
 
 ## Installation
 
@@ -155,4 +162,4 @@ actions:
 mode: single
 ```
 
-Giv gerne denne integration en stjerne på GitHub, hvis du synes om integration 👍
+Hvis du synes godt om denne integration, eller finder den brugbar, må du meget gerne give den en ⭐️ på GitHub 👍 Det vil blive værdsat!
