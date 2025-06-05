@@ -61,6 +61,7 @@ class StorageJson:
     ) -> None:
         """Init."""
 
+        self.DICT_KEY___ = "jsonpickle"
         self.write_hidden_attributes___: bool = False
         self.hass___ = hass
         self.store___ = StoreMigrate(
@@ -70,23 +71,36 @@ class StorageJson:
             minor_version=minor_version,
         )
         self.store___.custom_migrate_func = async_migrate_func
+        self.base_class___ = self.__class__ is StorageJson
 
     # ------------------------------------------------------------------
-    async def async_read_settings(self) -> None:
+    async def async_read_settings(self) -> dict | None:
         """read_settings."""
-        if hasattr(self, "__dict__") is False:
-            return
+
+        tmp_dict: dict = None
 
         data = await self.store___.async_load()
 
         if data is None:
-            return
-        tmp_obj = self.decode_data(data)
+            return None
 
-        if hasattr(tmp_obj, "__dict__") is False:
-            return
+        if type(data) is dict:
+            if self.DICT_KEY___ in data:
+                jsonpickle.set_encoder_options("json", ensure_ascii=False)
+                tmp_obj = self.decode_data(data[self.DICT_KEY___])
+                del data[self.DICT_KEY___]
 
-        self.__dict__.update(tmp_obj.__dict__)
+            if len(data) > 0:
+                tmp_dict = data
+        else:
+            tmp_obj = self.decode_data(data)
+
+        if not self.base_class___:
+            if not hasattr(tmp_obj, "__dict__"):
+                return tmp_dict
+            self.__dict__.update(tmp_obj.__dict__)
+
+        return tmp_dict
 
     # ------------------------------------------------------------------
     def decode_data(self, data: Any):
@@ -94,14 +108,18 @@ class StorageJson:
         return jsonpickle.decode(data)
 
     # ------------------------------------------------------------------
-    async def async_write_settings(
-        self,
-    ) -> None:
+    async def async_write_settings(self, extra_data: dict = {}) -> None:
         """Write settings."""
 
         jsonpickle.set_encoder_options("json", ensure_ascii=False)
 
-        await self.store___.async_save(self.encode_data(self))
+        if self.base_class___:
+            await self.store___.async_save(extra_data)
+
+        else:
+            await self.store___.async_save(
+                {self.DICT_KEY___: self.encode_data(self), **extra_data}
+            )
 
     # ------------------------------------------------------------------
     def encode_data(self, data: Any):
@@ -120,6 +138,8 @@ class StorageJson:
         del tmp_dict["write_hidden_attributes___"]
         del tmp_dict["hass___"]
         del tmp_dict["store___"]
+        del tmp_dict["DICT_KEY___"]
+        del tmp_dict["base_class___"]
 
         if self.write_hidden_attributes___ is False:
             try:

@@ -493,19 +493,17 @@ class ComponentApi:
         return reports
 
     # ------------------------------------------------------
+    @handle_retries(retries=5, retry_delay=5)
+    async def _async_get_new_traffic_reports(self, traffic_report_url: str) -> list:
+        async with timeout(self.request_timeout):
+            response = await self.session.get(traffic_report_url)
+            tmp_json: list = await response.json()
+
+        return tmp_json
+
+    # ------------------------------------------------------
     async def async_get_new_traffic_reports(self, last_entry_date: str = "") -> bool:
         """Get new traffic report."""
-
-        # ------------------------
-        @handle_retries(retries=5, retry_delay=5)
-        async def _async_get_new_traffic_reports(traffic_report_url: str) -> list:
-            async with timeout(self.request_timeout):
-                response = await self.session.get(traffic_report_url)
-                tmp_json: list = await response.json()
-
-            return tmp_json
-
-        # ------------------------
 
         done: bool = False
         ret_result: bool = False
@@ -536,7 +534,9 @@ class ComponentApi:
         traffic_report_url: str = f"https://api.dr.dk/trafik/posts?{region_part_url}{transport_type_part_url}lastPostDate={last_entry_date}"
 
         try:
-            tmp_json: list = await _async_get_new_traffic_reports(traffic_report_url)
+            tmp_json: list = await self._async_get_new_traffic_reports(
+                traffic_report_url
+            )
 
         except TimeoutError:
             return False
@@ -592,26 +592,26 @@ class ComponentApi:
         return ret_result
 
     # ------------------------------------------------------
+    @handle_retries(retries=5, retry_delay=5)
+    async def _async_get_important_notices(self, important_notices_url: str) -> list:
+        async with timeout(self.request_timeout):
+            response = await self.session.get(important_notices_url)
+            tmp_json: list = await response.json()
+
+        return tmp_json
+
+    # ------------------------------------------------------
     async def async_get_important_notices(self) -> bool:
         """Get important notices."""
-
-        # ------------------------
-        @handle_retries(retries=5, retry_delay=5)
-        async def _async_get_important_notices(important_notices_url: str) -> list:
-            async with timeout(self.request_timeout):
-                response = await self.session.get(important_notices_url)
-                tmp_json: list = await response.json()
-
-            return tmp_json
-
-        # ------------------------
 
         ret_result: bool = False
 
         important_notices_url: str = "https://api.dr.dk/trafik/notices"
 
         try:
-            tmp_json: list = await _async_get_important_notices(important_notices_url)
+            tmp_json: list = await self._async_get_important_notices(
+                important_notices_url
+            )
 
         except TimeoutError:
             return False

@@ -1,10 +1,16 @@
-# Trafikmeldinger
 
+<!-- markdownlint-disable MD041 -->
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/kgn3400/trafikmeldinger)
 ![GitHub all releases](https://img.shields.io/github/downloads/kgn3400/trafikmeldinger/total)
 ![GitHub last commit](https://img.shields.io/github/last-commit/kgn3400/trafikmeldinger)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kgn3400/trafikmeldinger)
 [![Validate% with hassfest](https://github.com/kgn3400/trafikmeldinger/workflows/Validate%20with%20hassfest/badge.svg)](https://github.com/kgn3400/trafikmeldinger/actions/workflows/hassfest.yaml)
+
+<img align="left" width="80" height="80" src="https://kgn3400.github.io/trafikmeldinger/assets/icon@2x.png" alt="App icon">
+
+# Trafikmeldinger
+
+<br/>
 
 Trafikmeldinger integrationen giver dig nem adgang til de seneste og vigtigste trafikmeldinger direkte fra [dr.dk/trafik](https://dr.dk/trafik). Med denne integration kan du altid holde dig opdateret om aktuelle trafikale forhold og hændelser i dit område.
 Du kan tilpasse visningen af trafikmeldinger ved at filtrere efter:

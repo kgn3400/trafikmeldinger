@@ -103,17 +103,6 @@ class Translate:
 
         if language is None:
             language = await async_get_user_language()
-            # language = self.hass.config.language
-
-            # owner = await self.hass.auth.async_get_owner()
-
-            # if owner is not None:
-            #     _, owner_data = await frontend_store.async_user_store(
-            #         self.hass, owner.id
-            #     )
-
-            #     if "language" in owner_data and "language" in owner_data["language"]:
-            #         language = owner_data["language"]["language"]
 
         await self.__async_check_language_loaded(
             str(language), file_name=file_name, load_only=load_only

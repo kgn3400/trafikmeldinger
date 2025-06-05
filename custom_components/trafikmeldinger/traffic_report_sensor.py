@@ -243,9 +243,13 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
 
         attr: dict = {}
 
-        if len(self.component_api.traffic_reports) == 0 or (
-            len(self.component_api.traffic_reports) > 0
-            and self.component_api.traffic_reports[0]["read"]
+        if (
+            len(self.component_api.traffic_reports) == 0
+            or "formated_updates_text" not in self.component_api.traffic_reports[0]
+            or (
+                len(self.component_api.traffic_reports) > 0
+                and self.component_api.traffic_reports[0]["read"]
+            )
         ):
             return attr
 
@@ -468,6 +472,10 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         if (
             self.component_api.traffic_report_rotate_pos == -1
             or len(self.component_api.traffic_reports) == 0
+            or "formated_updates_text"
+            not in self.component_api.traffic_reports[
+                self.component_api.traffic_report_rotate_pos
+            ]
         ):
             return attr
 
