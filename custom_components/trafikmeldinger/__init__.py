@@ -39,7 +39,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
 
     await component_api.storage.async_read_settings()
 
-    entry.async_on_unload(entry.add_update_listener(update_listener))
+    entry.async_on_unload(entry.add_update_listener(config_update_listener))
     entry.runtime_data = CommonData(
         component_api=component_api,
         # coordinator=coordinator,
@@ -66,14 +66,10 @@ async def async_reload_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> N
 
 
 # ------------------------------------------------------------------
-async def update_listener(
+async def config_update_listener(
     hass: HomeAssistant,
     config_entry: CommonConfigEntry,
 ) -> None:
     """Reload on config entry update."""
-
-    if config_entry.runtime_data.component_api.supress_update_listener:
-        config_entry.runtime_data.component_api.supress_update_listener = False
-        return
 
     await hass.config_entries.async_reload(config_entry.entry_id)

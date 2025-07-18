@@ -14,6 +14,7 @@ from homeassistant.util import dt as dt_util
 from . import CommonConfigEntry
 from .component_api import ComponentApi
 from .const import (
+    CONF_INCL_LATEST_IN_PREVIOUS_TRAFFIC_REPORTS,
     CONF_LISTEN_TO_TIMER_TRIGGER,
     CONF_MAX_TIME_BACK,
     CONF_RESTART_TIMER,
@@ -27,8 +28,6 @@ from .const import (
     TRANSLATION_KEY_MISSING_TIMER_ENTITY,
 )
 from .entity import ComponentEntity
-
-# from .timer_trigger import TimerTrigger, TimerTriggerErrorEnum
 from .hass_util import TimerTrigger, TimerTriggerErrorEnum
 
 
@@ -256,7 +255,10 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         attr["opdateringer"] = self.component_api.traffic_reports[0][
             "formated_updates_text"
         ]
-        attr["markdown"] = self.component_api.traffic_reports[0]["formated_md"]
+        attr["markdown"] = self.component_api.traffic_reports[0]["markdown"]
+
+        attr["opsummering_markdown"] = self.component_api.sum_traffic_md
+
         attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
         attr["transporttype"] = DICT_TRANSPORT_TYPE[
             self.component_api.traffic_reports[0]["type"]
@@ -366,6 +368,12 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         self._name = "Roterende"
         self._unique_id = "roterende"
 
+        self.start_pos: int = (
+            0
+            if entry.options.get(CONF_INCL_LATEST_IN_PREVIOUS_TRAFFIC_REPORTS, False)
+            else 1
+        )
+
         self.translation_key = TRANSLATION_KEY
 
         self.timer_trigger = TimerTrigger(
@@ -389,7 +397,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         self, call: ServiceCall
     ) -> None:
         """Mark all as read."""
-        self.component_api.get_next_traffic_report_pos()
+        self.component_api.get_next_traffic_report_pos(self.start_pos)
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------
@@ -400,6 +408,8 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
     # ------------------------------------------------------
     async def async_refresh(self, error: TimerTriggerErrorEnum) -> None:
         """Refresh."""
+
+        LOGGER.debug("Refreshing timer trigger")
 
         if error:
             match error:
@@ -423,7 +433,8 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
                     pass
             return
 
-        self.component_api.get_next_traffic_report_pos()
+        self.component_api.get_next_traffic_report_pos(self.start_pos)
+        await self.component_api.async_create_sum_traffic_md()
         self.async_write_ha_state()
 
     # ------------------------------------------------------
@@ -485,7 +496,10 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         attr["markdown"] = self.component_api.traffic_reports[
             self.component_api.traffic_report_rotate_pos
-        ]["formated_md"]
+        ]["markdown"]
+
+        attr["opsummering_markdown"] = self.component_api.sum_traffic_md
+
         attr["region"] = DICT_REGION[
             self.component_api.traffic_reports[
                 self.component_api.traffic_report_rotate_pos

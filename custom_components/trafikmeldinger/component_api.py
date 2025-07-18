@@ -4,7 +4,7 @@ from asyncio import timeout
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from logging import Logger
-from re import IGNORECASE, compile
+from re import IGNORECASE, Pattern, compile, escape
 
 from aiohttp.client import ClientSession
 from babel.dates import format_timedelta
@@ -23,6 +23,9 @@ from .const import (
     CONF_ONLY_SHOW_LAST_UPDATE,
     CONF_REGION,
     CONF_REGION_ALL,
+    CONF_SUM_INCL_IMPORTANT_NOTICES,
+    CONF_SUM_INCL_LATEST_TRAFFIC_REPORT,
+    CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -47,7 +50,7 @@ class TrafficStorage(StorageJson):
 
     # ------------------------------------------------------
     def __init__(self, hass: HomeAssistant) -> None:
-        """Message log settings."""
+        """Init."""
 
         super().__init__(hass, STORAGE_KEY, STORAGE_VERSION)
 
@@ -77,35 +80,50 @@ class ComponentApi:
 
         self.traffic_reports: list = []
         self.important_notices: list = []
-
-        self.supress_update_listener: bool = False
+        self.sum_traffic_md: str = ""
 
         self.close_session: bool = False
 
         self.request_timeout: int = 10
         self.storage: TrafficStorage = TrafficStorage(hass)
 
-        self.regex_comp = None
+        self.regex_comp: Pattern | None = None
         self.traffic_report_rotate_pos: int = -1
 
-        if len(entry.options.get(CONF_MATCH_LIST, [])) > 0:
-            match_word: str = r"\b" if entry.options.get(CONF_MATCH_WORD, False) else ""
-            match_list: list[str] = entry.options.get(CONF_MATCH_LIST)
-            reg1 = match_list[0]
-
-            for reg in match_list[1:]:
-                if reg.strip() != "":
-                    reg1 += "|" + reg
-            self.regex_str: str = rf"{match_word}({reg1}){match_word}"
-
-            self.regex_comp = (
-                compile(self.regex_str)
-                if entry.options.get(CONF_MATCH_CASE, False)
-                else compile(self.regex_str, IGNORECASE)
-            )
+        self.regex_comp = self.compile_any_word_regex(
+            entry.options.get(CONF_MATCH_LIST),
+            entry.options.get(CONF_MATCH_WORD, False),
+            entry.options.get(CONF_MATCH_CASE, False),
+        )
 
         self._max_time_back: datetime = None
         self._max_time_back_concluded: datetime = None
+
+    # ------------------------------------------------------------------
+    def compile_any_word_regex(
+        self,
+        words: list[str],
+        use_word_boundaries: bool = True,
+        case_sensitive: bool = False,
+    ) -> Pattern[str] | None:
+        """Returns a compiled regex pattern that matches if ANY word in the list is present in a text.
+
+        - use_word_boundaries: If True, only matches whole words.
+        - case_sensitive: If False, matches regardless of letter case.
+        """
+
+        if len(words) == 0:
+            return None
+
+        if use_word_boundaries:
+            pattern = r"|".join(
+                rf"\b{escape(word)}\b" for word in words if word.strip() != ""
+            )
+        else:
+            pattern = r"|".join(escape(word) for word in words if word.strip() != "")
+        combined_pattern: str = f"({pattern})"
+        flags: int = 0 if case_sensitive else IGNORECASE
+        return compile(combined_pattern, flags)
 
     # ------------------------------------------------------------------
     @async_hass_add_executor_job()
@@ -216,7 +234,7 @@ class ComponentApi:
         for report in self.traffic_reports:
             report["formated_text"] = self.traffic_report_format(report)
             report["formated_updates_text"] = self.traffic_report_updates_format(report)
-            report["formated_md"] = await self.async_traffic_report_format_md(report)
+            report["markdown"] = await self.async_traffic_report_format_md(report)
 
     # ------------------------------------------------------
     async def async_formatted_important_notices(self) -> None:
@@ -224,7 +242,7 @@ class ComponentApi:
 
         for notice in self.important_notices:
             notice["formated_text"] = self.important_notice_format(notice)
-            notice["formated_md"] = await self.async_important_notice_format_md(notice)
+            notice["markdown"] = await self.async_important_notice_format_md(notice)
 
     # ------------------------------------------------------
     async def async_update_important_notice_last_event_id(self) -> None:
@@ -343,6 +361,43 @@ class ComponentApi:
     #     ) - timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK_CONCLUDED, 2))
 
     # ------------------------------------------------------
+    async def async_create_sum_traffic_md(self) -> None:
+        """Create sum traffic."""
+
+        self.sum_traffic_md = ""
+
+        if self.important_notices and self.entry.options.get(
+            CONF_SUM_INCL_IMPORTANT_NOTICES, True
+        ):
+            self.sum_traffic_md += self.important_notices[0]["markdown"]
+
+        if self.traffic_reports and self.entry.options.get(
+            CONF_SUM_INCL_LATEST_TRAFFIC_REPORT, True
+        ):
+            if self.sum_traffic_md:
+                self.sum_traffic_md += "\n___\n"
+            self.sum_traffic_md += (
+                "### Seneste trafikmelding:\n" + self.traffic_reports[0]["markdown"]
+            )
+
+        if (
+            self.traffic_reports
+            and self.traffic_report_rotate_pos > 0
+            and self.entry.options.get(CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS, True)
+        ):
+            if self.sum_traffic_md:
+                self.sum_traffic_md += "\n___\n"
+            self.sum_traffic_md += (
+                "### Tidligere trafikmelderinger:\n"
+                + self.traffic_reports[self.traffic_report_rotate_pos]["markdown"]
+            )
+
+        if self.sum_traffic_md:
+            self.sum_traffic_md = "## Trafikmeldinger:\n" + self.sum_traffic_md
+        else:
+            self.sum_traffic_md = "## Trafikmeldinger:\nIngen aktuelle trafikmeldinger"
+
+    # ------------------------------------------------------
     async def async_refresh_traffic_reports(self) -> None:
         """Refresh traffic report."""
 
@@ -364,6 +419,8 @@ class ComponentApi:
 
         if await self.async_traffic_reports_event_fire():
             tmp_result = True
+
+        await self.async_create_sum_traffic_md()
 
         if tmp_result:
             await self.storage.async_write_settings()
@@ -743,45 +800,52 @@ class ComponentApi:
             self.important_notices[report]["read"] = False
 
     # ------------------------------------------------------------------
-    def get_next_traffic_report_pos(self) -> int:
+    def get_next_traffic_report_pos(self, start_pos: int = 0) -> int:
         """Get next traffic report position."""
 
-        if len(self.traffic_reports) == 0 or all(
-            value.get("read", False) for value in self.traffic_reports
+        if (
+            len(self.traffic_reports) == 0
+            or all(value.get("read", False) for value in self.traffic_reports)
+            or (len(self.traffic_reports) - 1) < start_pos
         ):
             self.traffic_report_rotate_pos = -1
 
-        elif len(self.traffic_reports) == 1:
-            self.traffic_report_rotate_pos = 0
+        # elif len(self.traffic_reports) == 1:
+        #     self.traffic_report_rotate_pos = 0
         else:
+            if self.traffic_report_rotate_pos == -1:
+                self.traffic_report_rotate_pos = start_pos - 1
+
             self.traffic_report_rotate_pos += 1
 
             if self.traffic_report_rotate_pos > (len(self.traffic_reports) - 1):
-                self.traffic_report_rotate_pos = 0
+                self.traffic_report_rotate_pos = start_pos
 
             if self.traffic_reports[self.traffic_report_rotate_pos].get("read", False):
-                self.get_next_traffic_report_pos()
+                self.get_next_traffic_report_pos(start_pos)
 
         return self.traffic_report_rotate_pos
 
     # ------------------------------------------------------------------
-    def get_prev_traffic_report_pos(self) -> int:
+    def get_prev_traffic_report_pos(self, start_pos: int = 0) -> int:
         """Get previous traffic report position."""
 
-        if len(self.traffic_reports) == 0 or all(
-            value.get("read", False) for value in self.traffic_reports
+        if (
+            len(self.traffic_reports) == 0
+            or all(value.get("read", False) for value in self.traffic_reports)
+            or (len(self.traffic_reports) - 1) < start_pos
         ):
             self.traffic_report_rotate_pos = -1
 
-        elif len(self.traffic_reports) == 1:
-            self.traffic_report_rotate_pos = 0
+        # elif len(self.traffic_reports) == 1:
+        #     self.traffic_report_rotate_pos = 0
         else:
             self.traffic_report_rotate_pos -= 1
 
-            if self.traffic_report_rotate_pos < 0:
+            if self.traffic_report_rotate_pos < start_pos:
                 self.traffic_report_rotate_pos = len(self.traffic_reports) - 1
 
             if self.traffic_reports[self.traffic_report_rotate_pos].get("read", False):
-                self.get_prev_traffic_report_pos()
+                self.get_prev_traffic_report_pos(start_pos)
 
         return self.traffic_report_rotate_pos

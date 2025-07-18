@@ -26,7 +26,6 @@
           "max_time_back": "Hent kun trafikmeldinger som er max timer gamle",
           "max_time_back_concluded": "Vis kun afsluttet trafikmeldinger som er max timer gamle",
           "max_row_fetch": "Hent max antal trafikmeldinger",
-          "only_show_last_update": "Vis kun den seneste opdatering",
           "rotate_every_minutes": "Roter imellem trafikmeldinger hvert minut",
           "listen_to_timer_trigger": "eller brug en Timer hjælper som rotationsudløserr",
           "restart_timer": "Genstart Timer hjælper automatisk"
@@ -39,6 +38,16 @@
           "match_case": "Match store og små bogstaver",
           "match_word": "Match hele ordet/udtryk",
           "match_list": "Match liste"
+        }
+      },
+      "user_extra": {
+        "title": "Trafikmeldinger",
+        "data": {
+          "only_show_last_update": "Vis kun den seneste opdatering",
+          "incl_latest_in_previous_traffic_reports": "Inkluder seneste opdatering i tidligere trafikmeldinger",
+          "sum_incl_important_notices": "Vigtige meddelelser i summering",
+          "sum_incl_latest_traffic_report": "Seneste trafikmelding i summering",
+          "sum_incl_previous_traffic_reports": "Tidligere trafikmeldinger i summering"
         }
       }
     }
@@ -74,12 +83,14 @@
           "match_list": "Match liste"
         }
       },
-      "extra": {
+      "init_extra": {
+        "title": "Trafikmeldinger",
         "data": {
-          "rt_received": "Modtaget",
-          "rt_for": "",
-          "rt_ago": "siden",
-          "rt_now": "nu"
+          "only_show_last_update": "Vis kun den seneste opdatering",
+          "incl_latest_in_previous_traffic_reports": "Inkluder seneste opdatering i tidligere trafikmeldinger",
+          "sum_incl_important_notices": "Vigtige meddelelser i summering",
+          "sum_incl_latest_traffic_report": "Seneste trafikmelding i summering",
+          "sum_incl_previous_traffic_reports": "Tidligere trafikmeldinger i summering"
         }
       }
     }

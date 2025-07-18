@@ -26,7 +26,6 @@
           "max_time_back": "Only fetch trafic reports that are maximum hours old",
           "max_time_back_concluded": "Only show concluded trafic reports that are maximum hours old",
           "max_row_fetch": "Fetch maximum trafic reports",
-          "only_show_last_update": "Only show the last update.",
           "rotate_every_minutes": "Rotate between traffic reports every minutes",
           "listen_to_timer_trigger": "Or use a Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
@@ -39,6 +38,16 @@
           "match_case": "Match case",
           "match_word": "Match the whole word",
           "match_list": "Match list"
+        }
+      },
+      "user_extra": {
+        "title": "Trafikmeldinger",
+        "data": {
+          "only_show_last_update": "Only show the last update.",
+          "incl_latest_in_previous_traffic_reports": "Include the latest update in previous traffic reports",
+          "sum_incl_important_notices": "Important notices in summary",
+          "sum_incl_latest_traffic_report": "Latest traffic report in summary",
+          "sum_incl_previous_traffic_reports": "Previous traffic reports in summary"
         }
       }
     }
@@ -59,7 +68,6 @@
           "max_time_back": "Only fetch trafic reports that are maximum hours old",
           "max_time_back_concluded": "Only show concluded trafic reports that are maximum hours old",
           "max_row_fetch": "Fetch maximum trafic reports",
-          "only_show_last_update": "Only show the last update.",
           "rotate_every_minutes": "Rotate between traffic reports every minutes",
           "listen_to_timer_trigger": "Or use a Timer helper as scroll trigger",
           "restart_timer": "Restart Timer helper automatic"
@@ -74,12 +82,14 @@
           "match_list": "Match list"
         }
       },
-      "extra": {
+      "init_extra": {
+        "title": "Trafikmeldinger",
         "data": {
-          "rt_received": "Received",
-          "rt_for": "",
-          "rt_ago": "ago",
-          "rt_now": "now"
+          "only_show_last_update": "Only show the last update.",
+          "incl_latest_in_previous_traffic_reports": "Include the latest update in previous traffic reports",
+          "sum_incl_important_notices": "Important notices in summary",
+          "sum_incl_latest_traffic_report": "Latest traffic report in summary",
+          "sum_incl_previous_traffic_reports": "Previous traffic reports in summary"
         }
       }
     }

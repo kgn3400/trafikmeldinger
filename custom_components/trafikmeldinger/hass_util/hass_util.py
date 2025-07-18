@@ -36,6 +36,28 @@ class ArgumentException(Exception):
 
 
 # ------------------------------------------------------
+def object_to_state_attr_dict(
+    obj: object, exclude_list: list = [], exlude_underscore_attrs: bool = True
+) -> dict:
+    """Convert object to hass state attribute dict."""
+    state_attr_dict: dict = {}
+
+    if obj is None:
+        return state_attr_dict
+
+    for key, value in obj.__dict__.items():
+        if key in exclude_list:
+            continue
+
+        if exlude_underscore_attrs and key.startswith("_"):
+            continue
+
+        state_attr_dict[key.lower().replace("_", " ")] = value
+
+    return state_attr_dict
+
+
+# ------------------------------------------------------
 async def async_get_user_language() -> str:
     """Execute a method in async mode in hass."""
 
@@ -64,7 +86,7 @@ async def async_get_user_language() -> str:
 def async_hass_add_executor_job(
     func=None,
 ):
-    """Decorator to execute a method in async mode in hass."""
+    """Decorator to execute a method in async mode in hass."""  # noqa: D401
 
     if func is None:
         return partial(

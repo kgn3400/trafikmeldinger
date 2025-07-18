@@ -29,6 +29,7 @@ from homeassistant.helpers.selector import (
 # from homeassistant.data_entry_flow import section
 #  from homeassistant import config_entries
 from .const import (
+    CONF_INCL_LATEST_IN_PREVIOUS_TRAFFIC_REPORTS,
     CONF_LISTEN_TO_TIMER_TRIGGER,
     CONF_MATCH_CASE,
     CONF_MATCH_LIST,
@@ -44,6 +45,9 @@ from .const import (
     CONF_REGION_SOUTH,
     CONF_RESTART_TIMER,
     CONF_ROTATE_EVERY_MINUTES,
+    CONF_SUM_INCL_IMPORTANT_NOTICES,
+    CONF_SUM_INCL_LATEST_TRAFFIC_REPORT,
+    CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -135,10 +139,6 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
                 unit_of_measurement="rækker",
             )
         ),
-        vol.Optional(
-            CONF_ONLY_SHOW_LAST_UPDATE,
-            default=True,
-        ): BooleanSelector(),
         vol.Required(
             CONF_ROTATE_EVERY_MINUTES,
             default=0.50,
@@ -168,8 +168,27 @@ CONFIG_OPTIONS_SCHEMA_MATCH = vol.Schema(
         vol.Optional(CONF_MATCH_LIST, default=[]): TextSelector(
             TextSelectorConfig(multiple=True)
         ),
-        vol.Optional(CONF_MATCH_CASE, default=False): bool,
-        vol.Optional(CONF_MATCH_WORD, default=False): bool,
+        vol.Optional(CONF_MATCH_CASE, default=False): BooleanSelector(),
+        vol.Optional(CONF_MATCH_WORD, default=False): BooleanSelector(),
+    }
+)
+
+CONFIG_OPTIONS_SCHEMA_EXTRA = vol.Schema(
+    {
+        vol.Optional(
+            CONF_ONLY_SHOW_LAST_UPDATE,
+            default=True,
+        ): BooleanSelector(),
+        vol.Optional(
+            CONF_INCL_LATEST_IN_PREVIOUS_TRAFFIC_REPORTS, default=False
+        ): BooleanSelector(),
+        vol.Optional(CONF_SUM_INCL_IMPORTANT_NOTICES, default=True): BooleanSelector(),
+        vol.Optional(
+            CONF_SUM_INCL_LATEST_TRAFFIC_REPORT, default=True
+        ): BooleanSelector(),
+        vol.Optional(
+            CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS, default=True
+        ): BooleanSelector(),
     }
 )
 
@@ -181,6 +200,11 @@ CONFIG_FLOW = {
     ),
     "user_match": SchemaFlowFormStep(
         CONFIG_OPTIONS_SCHEMA_MATCH,
+        next_step="user_extra",
+        validate_user_input=_validate_input,
+    ),
+    "user_extra": SchemaFlowFormStep(
+        CONFIG_OPTIONS_SCHEMA_EXTRA,
         validate_user_input=_validate_input,
     ),
 }
@@ -193,6 +217,11 @@ OPTIONS_FLOW = {
     ),
     "init_match": SchemaFlowFormStep(
         CONFIG_OPTIONS_SCHEMA_MATCH,
+        next_step="init_extra",
+        validate_user_input=_validate_input,
+    ),
+    "init_extra": SchemaFlowFormStep(
+        CONFIG_OPTIONS_SCHEMA_EXTRA,
         validate_user_input=_validate_input,
     ),
 }

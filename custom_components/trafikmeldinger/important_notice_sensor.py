@@ -137,7 +137,7 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["markdown"] = self.component_api.important_notices[0]["formated_md"]
+        attr["markdown"] = self.component_api.important_notices[0]["markdown"]
         attr["oprettet_tidspunkt"] = self.component_api.important_notices[0][
             "createdTime"
         ]

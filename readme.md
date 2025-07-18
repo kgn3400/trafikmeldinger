@@ -39,6 +39,8 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
 ![Config 2](https://kgn3400.github.io/trafikmeldinger/assets/config_2.png)
 
+![Config 3](https://kgn3400.github.io/trafikmeldinger/assets/config_3.png)
+
 ## Sensors
 
 Trafikmeldinger integrationen har følgende sensors:
@@ -63,7 +65,7 @@ Hver sensor har en egenskab som indeholder trafikmeldingen formateret som Markdo
 Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 skabeloner.
 
 ```Python
-{{ state_attr('sensor.trafikmeldinger_roterende', 'markdown') }}
+{{ state_attr('sensor.trafikmeldinger_vigtig_besked', 'markdown') }}
 ```
 
 ```Python
@@ -71,7 +73,11 @@ Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 
 ```
 
 ```Python
-{{ state_attr('sensor.trafikmeldinger_vigtig_besked', 'markdown') }}
+{{ state_attr('sensor.trafikmeldinger_roterende', 'markdown') }}
+```
+
+```Python
+{{ state_attr('sensor.trafikmeldinger_seneste', 'opsummering_markdown') }}
 ```
 
 ## Aktions

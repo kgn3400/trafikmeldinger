@@ -98,6 +98,13 @@ class DictToObject:
 
     def __init__(self, dictionary: dict):
         """Init."""
+
+        self.dict_to_object(dictionary)
+
+    # ------------------------------------------------------------------
+    def dict_to_object(self, dictionary: dict) -> None:
+        """Dictonary to Object."""
+
         for key, value in dictionary.items():
             if isinstance(value, dict):
                 setattr(self, key, DictToObject(value))
@@ -112,9 +119,3 @@ class DictToObject:
                 )
             else:
                 setattr(self, key, value)
-
-    # ------------------------------------------------------------------
-    def dict_to_object(self, dictionary: dict) -> None:
-        """Dictonary to Object."""
-
-        DictToObject.__init__(self, dictionary)
