@@ -21,11 +21,11 @@ from .const import (
     CONF_MAX_TIME_BACK,
     CONF_MAX_TIME_BACK_CONCLUDED,
     CONF_ONLY_SHOW_LAST_UPDATE,
+    CONF_OVERVIEW_IMPORTANT_NOTICES,
+    CONF_OVERVIEW_LATEST_TRAFFIC_REPORT,
+    CONF_OVERVIEW_PREVIOUS_TRAFFIC_REPORTS,
     CONF_REGION,
     CONF_REGION_ALL,
-    CONF_SUM_INCL_IMPORTANT_NOTICES,
-    CONF_SUM_INCL_LATEST_TRAFFIC_REPORT,
-    CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -80,7 +80,7 @@ class ComponentApi:
 
         self.traffic_reports: list = []
         self.important_notices: list = []
-        self.sum_traffic_md: str = ""
+        self.overview_traffic_md: str = ""
 
         self.close_session: bool = False
 
@@ -345,57 +345,50 @@ class ComponentApi:
         await self.async_update_important_notice_last_event_id()
 
     # ------------------------------------------------------
-    # def set_max_time_back(self) -> None:
-    #     """Set max time back."""
-
-    #     if self.entry.options.get(CONF_MAX_TIME_BACK, 0) > 0:
-    #         self._max_time_back: datetime = dt_util.as_local(
-    #             datetime.now(UTC)
-    #         ) - timedelta(hours=self.entry.options[CONF_MAX_TIME_BACK])
-
-    #     else:
-    #         self._max_time_back = None
-
-    #     self._max_time_back_concluded: datetime = dt_util.as_local(
-    #         datetime.now(UTC)
-    #     ) - timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK_CONCLUDED, 2))
-
-    # ------------------------------------------------------
-    async def async_create_sum_traffic_md(self) -> None:
+    async def async_create_overview_traffic_md(self) -> None:
         """Create sum traffic."""
 
-        self.sum_traffic_md = ""
+        self.overview_traffic_md = ""
 
-        if self.important_notices and self.entry.options.get(
-            CONF_SUM_INCL_IMPORTANT_NOTICES, True
+        if (
+            self.important_notices
+            and "markdown" in self.important_notices[0]
+            and self.entry.options.get(CONF_OVERVIEW_IMPORTANT_NOTICES, True)
         ):
-            self.sum_traffic_md += self.important_notices[0]["markdown"]
+            self.overview_traffic_md += self.important_notices[0]["markdown"]
 
-        if self.traffic_reports and self.entry.options.get(
-            CONF_SUM_INCL_LATEST_TRAFFIC_REPORT, True
+        if (
+            self.traffic_reports
+            and "markdown" in self.traffic_reports[0]
+            and self.entry.options.get(CONF_OVERVIEW_LATEST_TRAFFIC_REPORT, True)
         ):
-            if self.sum_traffic_md:
-                self.sum_traffic_md += "\n___\n"
-            self.sum_traffic_md += (
+            if self.overview_traffic_md:
+                self.overview_traffic_md += "\n___\n"
+            self.overview_traffic_md += (
                 "### Seneste trafikmelding:\n" + self.traffic_reports[0]["markdown"]
             )
 
         if (
             self.traffic_reports
             and self.traffic_report_rotate_pos > 0
-            and self.entry.options.get(CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS, True)
+            and "markdown" in self.traffic_reports[self.traffic_report_rotate_pos]
+            and self.entry.options.get(CONF_OVERVIEW_PREVIOUS_TRAFFIC_REPORTS, True)
         ):
-            if self.sum_traffic_md:
-                self.sum_traffic_md += "\n___\n"
-            self.sum_traffic_md += (
+            if self.overview_traffic_md:
+                self.overview_traffic_md += "\n___\n"
+            self.overview_traffic_md += (
                 "### Tidligere trafikmelderinger:\n"
                 + self.traffic_reports[self.traffic_report_rotate_pos]["markdown"]
             )
 
-        if self.sum_traffic_md:
-            self.sum_traffic_md = "## Trafikmeldinger:\n" + self.sum_traffic_md
+        if self.overview_traffic_md:
+            self.overview_traffic_md = (
+                "## Trafikmeldinger:\n" + self.overview_traffic_md
+            )
         else:
-            self.sum_traffic_md = "## Trafikmeldinger:\nIngen aktuelle trafikmeldinger"
+            self.overview_traffic_md = (
+                "## Trafikmeldinger:\nIngen aktuelle trafikmeldinger"
+            )
 
     # ------------------------------------------------------
     async def async_refresh_traffic_reports(self) -> None:
@@ -420,7 +413,7 @@ class ComponentApi:
         if await self.async_traffic_reports_event_fire():
             tmp_result = True
 
-        await self.async_create_sum_traffic_md()
+        await self.async_create_overview_traffic_md()
 
         if tmp_result:
             await self.storage.async_write_settings()

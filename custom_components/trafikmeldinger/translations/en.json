@@ -45,9 +45,9 @@
         "data": {
           "only_show_last_update": "Only show the last update.",
           "incl_latest_in_previous_traffic_reports": "Include the latest update in previous traffic reports",
-          "sum_incl_important_notices": "Important notices in summary",
-          "sum_incl_latest_traffic_report": "Latest traffic report in summary",
-          "sum_incl_previous_traffic_reports": "Previous traffic reports in summary"
+          "overview_important_notices": "Important notices in overview markdown",
+          "overview_latest_traffic_report": "Latest traffic report in overview markdown",
+          "overview_previous_traffic_reports": "Previous traffic reports in overview markdown"
         }
       }
     }

@@ -38,6 +38,9 @@ from .const import (
     CONF_MAX_TIME_BACK,
     CONF_MAX_TIME_BACK_CONCLUDED,
     CONF_ONLY_SHOW_LAST_UPDATE,
+    CONF_OVERVIEW_IMPORTANT_NOTICES,
+    CONF_OVERVIEW_LATEST_TRAFFIC_REPORT,
+    CONF_OVERVIEW_PREVIOUS_TRAFFIC_REPORTS,
     CONF_REGION,
     CONF_REGION_ALL,
     CONF_REGION_CPH,
@@ -45,9 +48,6 @@ from .const import (
     CONF_REGION_SOUTH,
     CONF_RESTART_TIMER,
     CONF_ROTATE_EVERY_MINUTES,
-    CONF_SUM_INCL_IMPORTANT_NOTICES,
-    CONF_SUM_INCL_LATEST_TRAFFIC_REPORT,
-    CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS,
     CONF_TRANSPORT_TYPE,
     CONF_TRANSPORT_TYPE_ALL,
     CONF_TRANSPORT_TYPE_PRIVATE,
@@ -146,7 +146,7 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
             NumberSelectorConfig(
                 min=0.25,
                 max=999,
-                step="any",
+                step=0.25,
                 mode=NumberSelectorMode.BOX,
                 unit_of_measurement="minutter",
             )
@@ -182,12 +182,12 @@ CONFIG_OPTIONS_SCHEMA_EXTRA = vol.Schema(
         vol.Optional(
             CONF_INCL_LATEST_IN_PREVIOUS_TRAFFIC_REPORTS, default=False
         ): BooleanSelector(),
-        vol.Optional(CONF_SUM_INCL_IMPORTANT_NOTICES, default=True): BooleanSelector(),
+        vol.Optional(CONF_OVERVIEW_IMPORTANT_NOTICES, default=True): BooleanSelector(),
         vol.Optional(
-            CONF_SUM_INCL_LATEST_TRAFFIC_REPORT, default=True
+            CONF_OVERVIEW_LATEST_TRAFFIC_REPORT, default=True
         ): BooleanSelector(),
         vol.Optional(
-            CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS, default=True
+            CONF_OVERVIEW_PREVIOUS_TRAFFIC_REPORTS, default=True
         ): BooleanSelector(),
     }
 )

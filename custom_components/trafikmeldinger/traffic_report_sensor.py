@@ -257,7 +257,7 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ]
         attr["markdown"] = self.component_api.traffic_reports[0]["markdown"]
 
-        attr["opsummering_markdown"] = self.component_api.sum_traffic_md
+        attr["oversigt_markdown"] = self.component_api.overview_traffic_md
 
         attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
         attr["transporttype"] = DICT_TRANSPORT_TYPE[
@@ -434,7 +434,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
             return
 
         self.component_api.get_next_traffic_report_pos(self.start_pos)
-        await self.component_api.async_create_sum_traffic_md()
+        await self.component_api.async_create_overview_traffic_md()
         self.async_write_ha_state()
 
     # ------------------------------------------------------
@@ -498,7 +498,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
             self.component_api.traffic_report_rotate_pos
         ]["markdown"]
 
-        attr["opsummering_markdown"] = self.component_api.sum_traffic_md
+        attr["oversigt_markdown"] = self.component_api.overview_traffic_md
 
         attr["region"] = DICT_REGION[
             self.component_api.traffic_reports[

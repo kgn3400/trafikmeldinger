@@ -50,9 +50,9 @@ CONF_ROTATE_EVERY_MINUTES = "rotate_every_minutes"
 
 CONF_INCL_LATEST_IN_PREVIOUS_TRAFFIC_REPORTS = "incl_latest_in_previous_traffic_reports"
 
-CONF_SUM_INCL_IMPORTANT_NOTICES = "sum_incl_important_notices"
-CONF_SUM_INCL_LATEST_TRAFFIC_REPORT = "sum_incl_latest_traffic_report"
-CONF_SUM_INCL_PREVIOUS_TRAFFIC_REPORTS = "sum_incl_previous_traffic_reports"
+CONF_OVERVIEW_IMPORTANT_NOTICES = "overview_important_notices"
+CONF_OVERVIEW_LATEST_TRAFFIC_REPORT = "overview_latest_traffic_report"
+CONF_OVERVIEW_PREVIOUS_TRAFFIC_REPORTS = "overview_previous_traffic_reports"
 
 CONF_MATCH = "match"
 CONF_MATCH_CASE = "match_case"

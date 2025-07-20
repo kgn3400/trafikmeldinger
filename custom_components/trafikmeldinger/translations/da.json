@@ -45,9 +45,9 @@
         "data": {
           "only_show_last_update": "Vis kun den seneste opdatering",
           "incl_latest_in_previous_traffic_reports": "Inkluder seneste opdatering i tidligere trafikmeldinger",
-          "sum_incl_important_notices": "Vigtige meddelelser i summering",
-          "sum_incl_latest_traffic_report": "Seneste trafikmelding i summering",
-          "sum_incl_previous_traffic_reports": "Tidligere trafikmeldinger i summering"
+          "overview_important_notices": "Vigtige meddelelser i oversigt markdown",
+          "overview_latest_traffic_report": "Seneste trafikmelding i oversigt markdown",
+          "overview_previous_traffic_reports": "Tidligere trafikmeldinger i oversigt markdown"
         }
       }
     }
@@ -88,9 +88,9 @@
         "data": {
           "only_show_last_update": "Vis kun den seneste opdatering",
           "incl_latest_in_previous_traffic_reports": "Inkluder seneste opdatering i tidligere trafikmeldinger",
-          "sum_incl_important_notices": "Vigtige meddelelser i summering",
-          "sum_incl_latest_traffic_report": "Seneste trafikmelding i summering",
-          "sum_incl_previous_traffic_reports": "Tidligere trafikmeldinger i summering"
+          "overview_important_notices": "Vigtige meddelelser i oversigt markdown",
+          "overview_latest_traffic_report": "Seneste trafikmelding i oversigt markdown",
+          "overview_previous_traffic_reports": "Tidligere trafikmeldinger i oversigt markdown"
         }
       }
     }
