@@ -35,11 +35,17 @@ Tilføj Trafikmeldinger integrationen til Home Assistant.
 
 Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
-![Config 1](https://kgn3400.github.io/trafikmeldinger/assets/config_1.png)
+<img src="https://kgn3400.github.io/trafikmeldinger/assets/config_1.png" width="400" height="auto" alt="Config 1">
+<br/>
+<br/>
 
-![Config 2](https://kgn3400.github.io/trafikmeldinger/assets/config_2.png)
+<img src="https://kgn3400.github.io/trafikmeldinger/assets/config_2.png" width="400" height="auto" alt="Config 2">
+<br/>
+<br/>
 
-![Config 3](https://kgn3400.github.io/trafikmeldinger/assets/config_3.png)
+<img src="https://kgn3400.github.io/trafikmeldinger/assets/config_3.png" width="400" height="auto" alt="Config 3">
+<br/>
+<br/>
 
 ## Sensors
 
