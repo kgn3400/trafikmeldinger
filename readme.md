@@ -37,10 +37,17 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
 <img src="https://kgn3400.github.io/trafikmeldinger/assets/config_1.png" width="400" height="auto" alt="Config 1">
 <br/>
+
+Hvis der bruges en [Timer hjælper](https://www.home-assistant.io/integrations/timer/), vil den automatisk rotere til næste trafikmelding. En timer hjælper skal kun bruges hvis der ønskes at synkroniserer med andre integrationer eller kort. Det er vigtigt at timer hjælperen ikke trigger under hvert 15 sekund, da det ellers kan belaste Home Assistant serveren.
 <br/>
 
 <img src="https://kgn3400.github.io/trafikmeldinger/assets/config_2.png" width="400" height="auto" alt="Config 2">
 <br/>
+
+Angiv ord/sætninger der skal matche trafikmeldingen for at fokusere på bestemte steder eller hændelser. Der foretages kun match på trafikmeldinger og ikke vigtige beskeder.
+
+> **Bemærk** at hvis der ingen meldinger eller filtreringen ikke giver noget resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
+
 <br/>
 
 <img src="https://kgn3400.github.io/trafikmeldinger/assets/config_3.png" width="400" height="auto" alt="Config 3">
@@ -51,16 +58,16 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
 Trafikmeldinger integrationen har følgende sensors:
 
-* `sensor.trafikmeldinger_seneste`
-Sensoren viser seneste trafikmelding.
-
-* `sensor.trafikmeldinger_roterende(Er kun aktiveret ved brug af en Timer hjælper)`
-Sensoren roterer automatisk til næste trafikmelding. Sensoren er kun aktiv/synlig hvis en [Timer hjælper](https://www.home-assistant.io/integrations/timer/) er oprettet og forbundet med Trafikmeldinger integrationen.
-
 * `sensor.trafikmeldinger_vigtig_besked`
 Sensoren viser seneste vigtig meddelelse for hele landet.
+<br/>
 
-> **Bemærk** at hvis filtreringen ikke giver noget umiddelbart resultat, vil sensorne være i ukendt tilstand. Dette kan bruges til at styre om kortet er synlighed.
+* `sensor.trafikmeldinger_seneste`
+Sensoren viser seneste trafikmelding.
+<br/>
+
+* `sensor.trafikmeldinger_roterende`
+Sensoren roterer automatisk til næste trafikmelding.
 
 ## Markdown egenskab
 
@@ -70,20 +77,28 @@ Hver sensor har en egenskab som indeholder trafikmeldingen formateret som Markdo
 
 Tilføj et Markdown kort til visningen og indsæt en af de nedenstående Jinja2 skabeloner.
 
+Vigtige beskeder i markdown format:
+
 ```Python
 {{ state_attr('sensor.trafikmeldinger_vigtig_besked', 'markdown') }}
 ```
+
+Seneste trafikmelding i markdown format:
 
 ```Python
 {{ state_attr('sensor.trafikmeldinger_seneste', 'markdown') }}
 ```
 
+Rotation imellem tidligere trafikmeldinger i markdown format:
+
 ```Python
 {{ state_attr('sensor.trafikmeldinger_roterende', 'markdown') }}
 ```
 
+Samlet 0versigt indeholdende vigtige beskeder, seneste trafikmelding og tidligere trafikmeldinger Alt efter hvad der er valgt i konfigurationen i markdown format:
+
 ```Python
-{{ state_attr('sensor.trafikmeldinger_seneste', 'opsummering_markdown') }}
+{{ state_attr('sensor.trafikmeldinger_roterende', 'oversigt_markdown') }}
 ```
 
 ## Aktions
