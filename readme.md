@@ -51,7 +51,6 @@ Angiv ord/sætninger der skal matche trafikmeldingen for at fokusere på bestem
 <br/>
 
 <img src="https://kgn3400.github.io/trafikmeldinger/assets/config_3.png" width="400" height="auto" alt="Config 3">
-<br/>
 
 ## Sensors
 
