@@ -39,6 +39,7 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 <br/>
 Hvis der bruges en [Timer hjælper](https://www.home-assistant.io/integrations/timer/), vil den automatisk rotere til næste trafikmelding. En timer hjælper skal kun bruges hvis der ønskes at synkroniserer med andre integrationer eller kort. Det er vigtigt at timer hjælperen ikke trigger under hvert 15 sekund, da det ellers kan belaste Home Assistant serveren.
 <br/>
+<br/>
 
 <img src="https://kgn3400.github.io/trafikmeldinger/assets/config_2.png" width="400" height="auto" alt="Config 2">
 <br/>
@@ -50,7 +51,6 @@ Angiv ord/sætninger der skal matche trafikmeldingen for at fokusere på bestem
 <br/>
 
 <img src="https://kgn3400.github.io/trafikmeldinger/assets/config_3.png" width="400" height="auto" alt="Config 3">
-<br/>
 <br/>
 
 ## Sensors
