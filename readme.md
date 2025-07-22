@@ -94,7 +94,7 @@ Rotation imellem tidligere trafikmeldinger i markdown format:
 {{ state_attr('sensor.trafikmeldinger_roterende', 'markdown') }}
 ```
 
-Samlet 0versigt indeholdende vigtige beskeder, seneste trafikmelding og tidligere trafikmeldinger Alt efter hvad der er valgt i konfigurationen i markdown format:
+Samlet oversigt indeholdende vigtige beskeder, seneste trafikmelding og tidligere trafikmeldinger i markdown format. Alt efter hvad der er valgt i konfigurationen :
 
 ```Python
 {{ state_attr('sensor.trafikmeldinger_roterende', 'oversigt_markdown') }}
