@@ -15,10 +15,10 @@
 Trafikmeldinger integrationen giver dig nem adgang til de seneste og vigtigste trafikmeldinger direkte fra [dr.dk/trafik](https://dr.dk/trafik). Med denne integration kan du altid holde dig opdateret om aktuelle trafikale forhold og hændelser i dit område.
 Du kan tilpasse visningen af trafikmeldinger ved at filtrere efter:
 
-* 'Region: Vælg én eller flere regioner for kun at se relevante meldinger for dit område.'
-* 'Transporttype: Filtrér efter f.eks. vejtrafik, tog, bus eller færge, så du kun ser meldinger for de transportformer, der interesserer dig.'
-* 'Maksimal alder: Angiv hvor mange timer gamle meldingerne må være, så du kun får vist de nyeste og mest relevante informationer.'
-* 'Søgeord eller sætninger: Indtast specifikke ord eller sætninger, som skal matche teksten i trafikmeldingen, for at fokusere på bestemte hændelser eller emner.'
+* Region: Vælg én eller flere regioner for kun at se relevante meldinger for dit område.
+* Transporttype: Filtrér efter f.eks. vejtrafik, tog, bus eller færge, så du kun ser meldinger for de transportformer, der interesserer dig.
+* Maksimal alder: Angiv hvor mange timer gamle meldingerne må være, så du kun får vist de nyeste og mest relevante informationer.
+* Søgeord eller sætninger: Indtast specifikke ord eller sætninger, som skal matche teksten i trafikmeldingen, for at fokusere på bestemte hændelser eller emner.
 
 Med denne fleksible filtrering får du præcis de trafikmeldinger, der er relevante for dig, direkte ind i dit Home Assistant-dashboard.
 
