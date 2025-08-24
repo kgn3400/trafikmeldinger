@@ -230,13 +230,9 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ):
             return None
 
-        # priority not concluded
-        if self.component_api.traffic_reports[0].get("concluded", False):
-            for item in self.component_api.traffic_reports:
-                if not item.get("concluded", False):
-                    return item.get("formated_text", "")
+        tmp_report: dict = self.component_api.get_latest_open_traffic_report()
 
-        return self.component_api.traffic_reports[0].get("formated_text", "")
+        return tmp_report.get("formated_text", "")
 
     # ------------------------------------------------------
     @property
@@ -260,28 +256,20 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["opdateringer"] = self.component_api.traffic_reports[0][
-            "formated_updates_text"
-        ]
-        attr["markdown"] = self.component_api.traffic_reports[0]["markdown"]
+        tmp_report: dict = self.component_api.get_latest_open_traffic_report()
+
+        attr["opdateringer"] = tmp_report["formated_updates_text"]
+        attr["markdown"] = tmp_report["markdown"]
 
         attr["oversigt_markdown"] = self.component_api.overview_traffic_md
 
-        attr["region"] = DICT_REGION[self.component_api.traffic_reports[0]["region"]]
-        attr["transporttype"] = DICT_TRANSPORT_TYPE[
-            self.component_api.traffic_reports[0]["type"]
-        ]
-        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[0][
-            "createdTime"
-        ]
-        attr["opdateret_tidspunkt"] = self.component_api.traffic_reports[0][
-            "updatedTime"
-        ]
-        attr["afsluttet"] = self.component_api.traffic_reports[0].get(
-            "concluded", False
-        )
+        attr["region"] = DICT_REGION[tmp_report["region"]]
+        attr["transporttype"] = DICT_TRANSPORT_TYPE[tmp_report["type"]]
+        attr["oprettet_tidspunkt"] = tmp_report["createdTime"]
+        attr["opdateret_tidspunkt"] = tmp_report["updatedTime"]
+        attr["afsluttet"] = tmp_report.get("concluded", False)
         attr["for_gammel_tidspunkt"] = dt_util.as_local(
-            datetime.fromisoformat(self.component_api.traffic_reports[0]["updatedTime"])
+            datetime.fromisoformat(tmp_report["updatedTime"])
             + timedelta(hours=self.entry.options.get(CONF_MAX_TIME_BACK, 0))
         )
 
@@ -473,9 +461,9 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         ):
             return None
 
-        return self.component_api.traffic_reports[
-            self.component_api.traffic_report_rotate_pos
-        ].get("formated_text", "")
+        tmp_report: dict = self.component_api.get_rotating_traffic_report()
+
+        return tmp_report.get("formated_text", "")
 
     # ------------------------------------------------------
     @property
@@ -499,32 +487,19 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
         ):
             return attr
 
-        attr["opdateringer"] = self.component_api.traffic_reports[
-            self.component_api.traffic_report_rotate_pos
-        ]["formated_updates_text"]
+        tmp_report: dict = self.component_api.get_rotating_traffic_report()
 
-        attr["markdown"] = self.component_api.traffic_reports[
-            self.component_api.traffic_report_rotate_pos
-        ]["markdown"]
+        attr["opdateringer"] = tmp_report["formated_updates_text"]
+
+        attr["markdown"] = tmp_report["markdown"]
 
         attr["oversigt_markdown"] = self.component_api.overview_traffic_md
 
-        attr["region"] = DICT_REGION[
-            self.component_api.traffic_reports[
-                self.component_api.traffic_report_rotate_pos
-            ]["region"]
-        ]
-        attr["transporttype"] = DICT_TRANSPORT_TYPE[
-            self.component_api.traffic_reports[
-                self.component_api.traffic_report_rotate_pos
-            ]["type"]
-        ]
-        attr["oprettet_tidspunkt"] = self.component_api.traffic_reports[
-            self.component_api.traffic_report_rotate_pos
-        ]["createdTime"]
-        attr["opdateret_tidspunkt"] = self.component_api.traffic_reports[
-            self.component_api.traffic_report_rotate_pos
-        ]["updatedTime"]
+        attr["region"] = DICT_REGION[tmp_report["region"]]
+
+        attr["transporttype"] = DICT_TRANSPORT_TYPE[tmp_report["type"]]
+        attr["oprettet_tidspunkt"] = tmp_report["createdTime"]
+        attr["opdateret_tidspunkt"] = tmp_report["updatedTime"]
 
         attr["antal_trafikmeldinger"] = len(self.component_api.traffic_reports)
         attr["markeret_som_læst"] = self.component_api.storage.marked_as_read

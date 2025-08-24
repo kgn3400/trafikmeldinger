@@ -214,6 +214,30 @@ class ComponentApi:
         return report["text"][:255]
 
     # ------------------------------------------------------
+    def get_rotating_traffic_report(self) -> dict:
+        """Get rotating traffic report."""
+
+        if len(self.traffic_reports) == 0 or self.traffic_report_rotate_pos == -1:
+            return None
+
+        return self.traffic_reports[self.traffic_report_rotate_pos]
+
+    # ------------------------------------------------------
+    def get_latest_open_traffic_report(self) -> dict:
+        """Get latest (open) traffic report."""
+
+        if len(self.traffic_reports) == 0:
+            return None
+
+        # Prioritize not concluded
+        if self.traffic_reports[0].get("concluded", False):
+            for idx, item in enumerate(self.traffic_reports):
+                if not item.get("concluded", False):
+                    return self.traffic_reports[idx]
+
+        return self.traffic_reports[0]
+
+    # ------------------------------------------------------
     async def async_important_notice_format_md(self, report: dict) -> str:
         """Format important notice as markdown."""
 
