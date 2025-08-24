@@ -50,7 +50,9 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         self.entry: CommonConfigEntry = entry
 
         super().__init__(
-            DataUpdateCoordinator(hass, LOGGER, name=DOMAIN, always_update=False),
+            DataUpdateCoordinator(
+                hass, LOGGER, name=DOMAIN, always_update=False, config_entry=entry
+            ),
             entry,
         )
         self.component_api: ComponentApi = entry.runtime_data.component_api
@@ -228,6 +230,12 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         ):
             return None
 
+        # priority not concluded
+        if self.component_api.traffic_reports[0].get("concluded", False):
+            for item in self.component_api.traffic_reports:
+                if not item.get("concluded", False):
+                    return item.get("formated_text", "")
+
         return self.component_api.traffic_reports[0].get("formated_text", "")
 
     # ------------------------------------------------------
@@ -358,6 +366,7 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
                 hass,
                 LOGGER,
                 name=DOMAIN,
+                config_entry=entry,
             ),
             entry,
         )

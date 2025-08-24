@@ -39,6 +39,7 @@ class ImportantNoticeLatestSensor(ComponentEntity, SensorEntity):
                 name=DOMAIN,
                 update_interval=timedelta(minutes=4),
                 update_method=self.async_refresh,
+                config_entry=entry,
             ),
             entry,
         )

@@ -30,7 +30,7 @@ from .hass_util import (
 )
 from .json_ext import DictToObject, JsonExt
 from .storage_json import StorageJson, StoreMigrate
-from .timer_trigger import TimerTrigger, TimerTriggerErrorEnum
+from .timer_trigger import PointInUTCTimeTrigger, TimerTrigger, TimerTriggerErrorEnum
 from .translate import NumberSelectorConfigTranslate, Translate
 
 __all__ = [
@@ -42,6 +42,7 @@ __all__ = [
     "HandleRetriesException",
     "JsonExt",
     "NumberSelectorConfigTranslate",
+    "PointInUTCTimeTrigger",
     "RetryStopException",
     "StorageJson",
     "StoreMigrate",
