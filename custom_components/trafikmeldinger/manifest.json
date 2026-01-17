@@ -18,6 +18,6 @@
   ],
   "single_config_entry": true,
   "ssdp": [],
-  "version": "1.0.28",
+  "version": "1.0.29",
   "zeroconf": []
 }

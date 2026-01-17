@@ -217,7 +217,7 @@ class PointInUTCTimeTrigger:
         duration: timedelta | None = None,
         callback_trigger: Callable[[], None] = None,
         auto_restart: bool | None = None,
-    ) -> None:
+    ) -> datetime | None:
         """Start point in UTC time trigger."""
 
         if point_in_time_UTC is not None:
@@ -232,7 +232,7 @@ class PointInUTCTimeTrigger:
         if auto_restart is not None:
             self.auto_restart = auto_restart
 
-        self.point_in_time_listener_start()
+        return self.point_in_time_listener_start()
 
     # ------------------------------------------------------
     async def async_hass_started(self, _event: Event) -> None:
@@ -270,11 +270,11 @@ class PointInUTCTimeTrigger:
             self.point_in_time_listener_start()
 
     # ------------------------------------------------------------------
-    def point_in_time_listener_start(self) -> None:
+    def point_in_time_listener_start(self) -> datetime | None:
         """Point in time listener start."""
 
         if self.error:
-            return
+            return None
 
         if self.unsub_async_track_point_in_utc_time:
             self.unsub_async_track_point_in_utc_time()
@@ -299,15 +299,21 @@ class PointInUTCTimeTrigger:
             self.error = TimerTriggerErrorEnum.PARAMETER_ERROR
             raise ValueError("callback_trigger must be provided")
 
+        tmp_datetime: datetime
+
         if self.point_in_time_UTC:
             self.unsub_async_track_point_in_utc_time = async_track_point_in_utc_time(
                 self.entity.hass,
                 self.async_point_in_time_listener,
                 self.point_in_time_UTC,
             )
+            tmp_datetime = self.point_in_time_UTC
         else:
+            tmp_datetime = dt_util.utcnow() + self.duration
             self.unsub_async_track_point_in_utc_time = async_track_point_in_utc_time(
                 self.entity.hass,
                 self.async_point_in_time_listener,
-                dt_util.utcnow() + self.duration,
+                tmp_datetime,
             )
+
+        return tmp_datetime

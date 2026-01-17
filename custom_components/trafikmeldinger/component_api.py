@@ -56,6 +56,7 @@ class TrafficStorage(StorageJson):
 
         self.traffic_reports_last_id: dict[str, str] = {}
         self.important_notice_last_id: str = ""
+        self.important_notice_last_text: str = ""
 
         self.marked_as_read: int = 0
 
@@ -353,11 +354,18 @@ class ComponentApi:
         if len(self.important_notices) == 0:
             return
 
-        if self.storage.important_notice_last_id != (
-            self.important_notices[0]["_id"]
-            + " "
-            + self.important_notices[0]["updatedTime"]
+        if (
+            self.storage.important_notice_last_id
+            != (
+                self.important_notices[0]["_id"]
+                + " "
+                + self.important_notices[0]["updatedTime"]
+            )
+            and self.storage.important_notice_last_text
+            != self.important_notices[0]["text"]
         ):
+            self.storage.important_notice_last_text = self.important_notices[0]["text"]
+
             self.hass.bus.async_fire(
                 DOMAIN + "." + EVENT_NEW_IMPORTANT_NOTICE,
                 {
