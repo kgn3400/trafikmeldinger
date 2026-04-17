@@ -48,14 +48,14 @@ from .const import (
     CONF_REGION_SOUTH,
     CONF_RESTART_TIMER,
     CONF_ROTATE_EVERY_MINUTES,
-    CONF_TRANSPORT_TYPE,
-    CONF_TRANSPORT_TYPE_ALL,
-    CONF_TRANSPORT_TYPE_PRIVATE,
-    CONF_TRANSPORT_TYPE_PUBLIC,
+    # CONF_TRANSPORT_TYPE,
+    # CONF_TRANSPORT_TYPE_ALL,
+    # CONF_TRANSPORT_TYPE_PRIVATE,
+    # CONF_TRANSPORT_TYPE_PUBLIC,
     DOMAIN,
     DOMAIN_NAME,
     TRANSLATION_KEY_REGION,
-    TRANSLATION_KEY_TRANSPORT_TYPE,
+    # TRANSLATION_KEY_TRANSPORT_TYPE,
 )
 
 
@@ -91,21 +91,21 @@ CONFIG_OPTIONS_SCHEMA = vol.Schema(
                 translation_key=TRANSLATION_KEY_REGION,
             )
         ),
-        vol.Required(
-            CONF_TRANSPORT_TYPE, default=[CONF_TRANSPORT_TYPE_ALL]
-        ): SelectSelector(
-            SelectSelectorConfig(
-                multiple=True,
-                options=[
-                    CONF_TRANSPORT_TYPE_ALL,
-                    CONF_TRANSPORT_TYPE_PUBLIC,
-                    CONF_TRANSPORT_TYPE_PRIVATE,
-                ],
-                sort=True,
-                mode=SelectSelectorMode.DROPDOWN,
-                translation_key=TRANSLATION_KEY_TRANSPORT_TYPE,
-            )
-        ),
+        # vol.Required(
+        #     CONF_TRANSPORT_TYPE, default=[CONF_TRANSPORT_TYPE_ALL]
+        # ): SelectSelector(
+        #     SelectSelectorConfig(
+        #         multiple=True,
+        #         options=[
+        #             CONF_TRANSPORT_TYPE_ALL,
+        #             CONF_TRANSPORT_TYPE_PUBLIC,
+        #             CONF_TRANSPORT_TYPE_PRIVATE,
+        #         ],
+        #         sort=True,
+        #         mode=SelectSelectorMode.DROPDOWN,
+        #         translation_key=TRANSLATION_KEY_TRANSPORT_TYPE,
+        #     )
+        # ),
         vol.Required(
             CONF_MAX_TIME_BACK,
             default=12,

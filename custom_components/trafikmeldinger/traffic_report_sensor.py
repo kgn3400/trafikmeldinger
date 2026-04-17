@@ -20,7 +20,6 @@ from .const import (
     CONF_RESTART_TIMER,
     CONF_ROTATE_EVERY_MINUTES,
     DICT_REGION,
-    DICT_TRANSPORT_TYPE,
     DOMAIN,
     DOMAIN_NAME,
     LOGGER,
@@ -264,7 +263,8 @@ class TrafficReportLatestSensor(ComponentEntity, SensorEntity):
         attr["oversigt_markdown"] = self.component_api.overview_traffic_md
 
         attr["region"] = DICT_REGION[tmp_report["region"]]
-        attr["transporttype"] = DICT_TRANSPORT_TYPE[tmp_report["type"]]
+        attr["transporttype"] = tmp_report["incidentType"]
+        # attr["transporttype"] = DICT_TRANSPORT_TYPE[tmp_report["type"]]
         attr["oprettet_tidspunkt"] = tmp_report["createdTime"]
         attr["opdateret_tidspunkt"] = tmp_report["updatedTime"]
         attr["afsluttet"] = tmp_report.get("concluded", False)
@@ -497,7 +497,8 @@ class TrafficReportRotateSensor(ComponentEntity, SensorEntity):
 
         attr["region"] = DICT_REGION[tmp_report["region"]]
 
-        attr["transporttype"] = DICT_TRANSPORT_TYPE[tmp_report["type"]]
+        # attr["transporttype"] = DICT_TRANSPORT_TYPE[tmp_report["type"]]
+        attr["transporttype"] = tmp_report["incidentType"]
         attr["oprettet_tidspunkt"] = tmp_report["createdTime"]
         attr["opdateret_tidspunkt"] = tmp_report["updatedTime"]
 
